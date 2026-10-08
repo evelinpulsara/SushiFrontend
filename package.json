@@ -1,0 +1,17 @@
+{
+  "name": "restotime-ai-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "contract:generate": "openapi-typescript ${CONTRACT_URL:-http://localhost:4000/api/docs/openapi.json} -o src/domain/api-contract.ts"
+  },
+  "dependencies": {
+    "lucide-react": "^1.73.0",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
