@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0b0d;
+  --color-ink-soft: #111114;
+  --color-surface: #16161a;
+  --color-surface-raised: #1c1c21;
+  --color-line: #26262c;
+  --color-line-strong: #34343c;
+  --color-torii: #e63946;
+  --color-torii-deep: #b82c38;
+  --color-gold: #d4af37;
+  --color-ivory: #f8f9fa;
+  --color-mist: #d0d0d8;
+  --color-smoke: #a4a4b0;
+  --color-matcha: #7fb069;
+  --color-aiiro: #5b7db1;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-mincho), "Hiragino Mincho ProN", serif;
+
+  --animate-rise: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-draw: draw 2.4s ease-out both;
+  --animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+  --animate-slide-compositor: slide-compositor 1.6s ease-in-out infinite alternate;
+  --animate-slide-layout: slide-layout 1.6s ease-in-out infinite alternate;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes draw {
+    from { stroke-dashoffset: 1200; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes slide-compositor {
+    from { transform: translateX(0); }
