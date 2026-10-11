@@ -40,3 +40,46 @@
   }
   @keyframes slide-compositor {
     from { transform: translateX(0); }
+    to { transform: translateX(calc(100% - 3rem)); }
+  }
+  @keyframes slide-layout {
+    from { left: 0; }
+    to { left: calc(100% - 3rem); }
+  }
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-ivory);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+  letter-spacing: 0.005em;
+}
+
+p, li {
+  text-wrap: pretty;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
