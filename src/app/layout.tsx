@@ -23,3 +23,25 @@ const mincho = Shippori_Mincho({
 export const metadata: Metadata = {
   title: { default: es.meta.title, template: `%s · ${es.brand.product} AI` },
   description: es.meta.description,
+  applicationName: 'RestoTime AI',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0b0b0d',
+  colorScheme: 'dark',
+};
+
+export default function RootLayout({ children }: LayoutProps<'/'>) {
+  return (
+    <html lang="es" className={`${inter.variable} ${mincho.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-ink font-sans text-ivory">
+        <LanguageProvider>
+          <Navbar />
+          <ServiceWorkerRegistrar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </LanguageProvider>
+      </body>
+    </html>
+  );
+}
