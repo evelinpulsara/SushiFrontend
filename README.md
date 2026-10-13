@@ -32,3 +32,31 @@ app's origin (CORS).
 | `/` | Landing: hero, live dining-room snapshot, AI features, chef's selection, spaces |
 | `/menu` | Full bilingual menu with allergen filter and category tabs |
 | `/reservations` | Smart booking form with live availability; the AI assigns the table |
+| `/reservations/[code]` | Booking details and cancellation |
+| `/waitlist` | AI wait estimate (Jikan Engine) and joining the waitlist |
+| `/waitlist/[ticket]` | Live ticket: position, remaining time, AI re-estimate |
+| `/concierge` | Virtual Itamae chat (sommelier & omakase concierge), `?reservation=` / `?ticket=` |
+| `/login` | Staff access (demo accounts one click away) |
+| `/dashboard` | 🔒 Staff (admin, host) — Host dashboard: KPIs, floor plan, waitlist, AI seat suggestions, WebSocket presence, Monte Carlo forecast, INP HUD |
+| `/lab` | 🔒 Admin only — Tech lab: live INP, Event Loop and compositor demos, workers status, rendering patterns, communication |
+| `/offline` | Fallback page served by the Service Worker |
+
+## Architecture
+
+```text
+src/
+├── app/                    Routes (thin server components) + globals.css design tokens
+├── components/
+│   ├── layout/             Navbar, LanguageSwitcher (ES | EN), Footer, PageHeader
+│   ├── ui/                 Button, Card, Badge, Notice, form fields, AllergenPicker…
+│   ├── decor/              Torii mark, ensō, vertical kanji, hanko divider (SVG)
+│   ├── ai/                 WaitEstimateCard (AI prediction display)
+│   └── home | menu | reservations | waitlist | concierge | dashboard
+├── domain/models.ts        Domain types mirroring the backend DTOs
+├── hooks/                  useResource, useLiveEvents, useRestaurantInfo, useErrorText
+└── lib/
+    ├── api/ApiClient.ts    Typed fetch client (+ ApiError), sends Accept-Language
+    ├── i18n/               LanguageManager (observable store), LanguageProvider, dictionaries
+    ├── format/Formatter.ts Currency / dates / times in the restaurant timezone
+    └── services/           ServiceRegistry (composition root), RestaurantDirectory,
+                            MenuCatalog, ReservationManager, WaitlistManager,
