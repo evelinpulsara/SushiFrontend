@@ -120,3 +120,146 @@ export interface DiningTable {
   code: string;
   capacity: number;
   minCapacity: number;
+  shape: TableShape;
+  status: TableStatus;
+  effectiveStatus: TableStatus;
+  position: { x: number; y: number };
+  isCombinable: boolean;
+  isActive: boolean;
+  statusChangedAt: string;
+  zone: { id: string; code: string; nameEs: string; nameEn: string };
+  currentSeating: {
+    seatingId: string;
+    guestName: string;
+    partySize: number;
+    seatedAt: string;
+    expectedEndAt: string;
+    minutesSeated: number;
+    minutesRemaining: number;
+  } | null;
+  nextReservation: {
+    reservationId: string;
+    reservationCode: string;
+    guestName: string;
+    partySize: number;
+    reservedAt: string;
+    minutesUntil: number;
+  } | null;
+}
+
+export interface Reservation {
+  id: string;
+  reservationCode: string;
+  guestName: string;
+  guestEmail: string | null;
+  guestPhone: string;
+  partySize: number;
+  reservedAt: string;
+  endsAt: string;
+  durationMinutes: number;
+  preferredZone: { id: string; code: string; nameEs: string; nameEn: string } | null;
+  status: ReservationStatus;
+  specialRequests: string | null;
+  dietaryRestrictions: Allergen[];
+  language: Language;
+  tables: Array<{ id: string; code: string }>;
+  seatedAt: string | null;
+  completedAt: string | null;
+  cancelledAt: string | null;
+  createdAt: string;
+}
+
+export interface AvailabilityOption {
+  tables: Array<{ id: string; code: string }>;
+  zoneCode: string;
+  capacity: number;
+  isMerged: boolean;
+}
+
+export interface LocalSlot {
+  date: string;
+  time: string;
+}
+
+export interface Availability {
+  date: string;
+  time: string;
+  partySize: number;
+  isBookable: boolean;
+  durationMinutes: number;
+  options: AvailabilityOption[];
+  alternativeTimes: LocalSlot[];
+}
+
+export interface SlotAvailability {
+  time: string;
+  shift: string;
+  isBookable: boolean;
+  options: number;
+}
+
+export interface ZoneFit {
+  zoneId: string;
+  zoneCode: string;
+  minPartySize: number;
+  maxPartySize: number;
+  fitsParty: boolean;
+}
+
+export interface DayAvailability {
+  date: string;
+  partySize: number;
+  zoneId: string | null;
+  isOpen: boolean;
+  slots: SlotAvailability[];
+  zones: ZoneFit[];
+}
+
+export interface NewReservation {
+  guestName: string;
+  guestEmail: string | null;
+  guestPhone: string;
+  partySize: number;
+  date: string;
+  time: string;
+  preferredZoneId: string | null;
+  specialRequests: string | null;
+  dietaryRestrictions: Allergen[];
+}
+
+export interface PredictedTable {
+  id: string;
+  code: string;
+  zoneCode: string;
+  capacity: number;
+}
+
+export interface WaitEstimate {
+  predictionId: string | null;
+  estimatedWaitMinutes: number;
+  confidence: number;
+  strategy: AssignmentStrategy;
+  tables: PredictedTable[];
+  reasoning: string;
+  alternatives: Array<{
+    strategy: AssignmentStrategy;
+    tables: PredictedTable[];
+    estimatedWaitMinutes: number;
+    note: string;
+  }>;
+  model: string;
+  isFallback: boolean;
+  generatedAt: string;
+}
+
+export interface CreatedReservation {
+  reservation: Reservation;
+  assignment: WaitEstimate;
+}
+
+export interface WaitlistEntry {
+  id: string;
+  ticketCode: string;
+  guestName: string;
+  guestPhone: string;
+  partySize: number;
