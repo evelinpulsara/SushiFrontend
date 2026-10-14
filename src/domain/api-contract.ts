@@ -395,3 +395,400 @@ export interface paths {
         post: operations["releaseSeating"];
         delete?: never;
         options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/concierge/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["startConversation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/concierge/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getConversation"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/concierge/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sendConciergeMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDashboardOverview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/kpis": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getKpis"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/ai-accuracy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getAIAccuracy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/dining-durations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDiningDurations"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["streamEvents"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ws": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["hostCollaborationSocket"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+}
+export type webhooks = Record<string, never>;
+export interface components {
+    schemas: {
+        LocalDate: string;
+        LocalTime: string;
+        Language: "es" | "en";
+        TableStatus: "available" | "occupied" | "reserved" | "clearing_soon";
+        TableShape: "round" | "square" | "rectangle" | "bar_counter" | "tatami";
+        ReservationStatus: "pending" | "confirmed" | "seated" | "completed" | "cancelled" | "no_show";
+        WaitlistStatus: "waiting" | "notified" | "seated" | "cancelled" | "no_show";
+        AssignmentStrategy: "single_table" | "merge_tables" | "wait_for_table" | "alternative_zone";
+        MenuItemKind: "food" | "drink";
+        ServiceShift: "lunch" | "dinner";
+        Allergen: "fish" | "shellfish" | "soy" | "gluten" | "sesame" | "egg" | "dairy" | "tree_nuts" | "peanuts" | "sulfites" | "alcohol";
+        DietaryTag: "vegetarian" | "vegan" | "gluten_free" | "raw" | "cooked" | "spicy" | "signature" | "seasonal" | "non_alcoholic";
+        StaffRole: "admin" | "host";
+        LoginRequest: {
+            email: string;
+            password: string;
+        };
+        StaffMember: {
+            id: string;
+            email: string;
+            displayName: string;
+            role: components["schemas"]["StaffRole"];
+        };
+        StaffSession: {
+            token: string;
+            expiresAt: string;
+            staff: components["schemas"]["StaffMember"];
+        };
+        StaffSessionEnvelope: {
+            success: true;
+            data: components["schemas"]["StaffSession"];
+        };
+        StaffMemberEnvelope: {
+            success: true;
+            data: components["schemas"]["StaffMember"];
+        };
+        ErrorEnvelope: {
+            success: false;
+            error: {
+                code: string;
+                message: string;
+                details?: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        Zone: {
+            id: string;
+            code: string;
+            nameEs: string;
+            nameEn: string;
+            descriptionEs: string;
+            descriptionEn: string;
+            isPremium: boolean;
+            displayOrder: number;
+        };
+        ServiceHour: {
+            dayOfWeek: number;
+            shift: components["schemas"]["ServiceShift"];
+            opensAt: components["schemas"]["LocalTime"];
+            lastSeatingAt: components["schemas"]["LocalTime"];
+            closesAt: components["schemas"]["LocalTime"];
+        };
+        RestaurantSettings: {
+            restaurantName: string;
+            timezone: string;
+            currencyCode: string;
+            defaultDiningMinutes: number;
+            turnoverBufferMinutes: number;
+            reservationSlotMinutes: number;
+            maxPartySize: number;
+            reservedHoldMinutes: number;
+        };
+        RestaurantInfo: {
+            settings: components["schemas"]["RestaurantSettings"];
+            serviceHours: components["schemas"]["ServiceHour"][];
+            zones: components["schemas"]["Zone"][];
+            localNow: {
+                date: components["schemas"]["LocalDate"];
+                time: components["schemas"]["LocalTime"];
+                dayOfWeek: number;
+            };
+        };
+        MenuItem: {
+            id: string;
+            categoryId: string;
+            categorySlug: string;
+            kind: components["schemas"]["MenuItemKind"];
+            slug: string;
+            name: string;
+            nameJa: string;
+            descriptionEs: string;
+            descriptionEn: string;
+            price: number;
+            allergens: components["schemas"]["Allergen"][];
+            dietaryTags: components["schemas"]["DietaryTag"][];
+            spiceLevel: number;
+            pieces: number | null;
+            alcoholPercentage: number | null;
+            pairingNotesEs: string | null;
+            pairingNotesEn: string | null;
+            imageUrl: string | null;
+            isAvailable: boolean;
+            isFeatured: boolean;
+            displayOrder: number;
+        };
+        MenuCategory: {
+            id: string;
+            slug: string;
+            kind: components["schemas"]["MenuItemKind"];
+            nameEs: string;
+            nameEn: string;
+            nameJa: string;
+            displayOrder: number;
+            items: components["schemas"]["MenuItem"][];
+        };
+        Menu: {
+            currencyCode: string;
+            excludedAllergens: components["schemas"]["Allergen"][];
+            categories: components["schemas"]["MenuCategory"][];
+        };
+        ZoneRef: {
+            id: string;
+            code: string;
+            nameEs: string;
+            nameEn: string;
+        };
+        DiningTable: {
+            id: string;
+            code: string;
+            capacity: number;
+            minCapacity: number;
+            shape: components["schemas"]["TableShape"];
+            status: components["schemas"]["TableStatus"];
+            effectiveStatus: components["schemas"]["TableStatus"];
+            position: {
+                x: number;
+                y: number;
+            };
+            isCombinable: boolean;
+            isActive: boolean;
+            statusChangedAt: string;
+            zone: components["schemas"]["ZoneRef"];
+            currentSeating: null | {
+                seatingId: string;
+                guestName: string;
+                partySize: number;
+                seatedAt: string;
+                expectedEndAt: string;
+                minutesSeated: number;
+                minutesRemaining: number;
+            };
+            nextReservation: null | {
+                reservationId: string;
+                reservationCode: string;
+                guestName: string;
+                partySize: number;
+                reservedAt: string;
+                minutesUntil: number;
+            };
+        };
+        NewReservation: {
+            guestName: string;
+            guestEmail?: string | null;
+            guestPhone: string;
+            partySize: number;
+            date: components["schemas"]["LocalDate"];
+            time: components["schemas"]["LocalTime"];
+            preferredZoneId?: string | null;
+            specialRequests?: string | null;
+            dietaryRestrictions?: components["schemas"]["Allergen"][];
+        };
+        TableRef: {
+            id: string;
+            code: string;
+        };
+        Reservation: {
+            id: string;
+            reservationCode: string;
+            guestName: string;
+            guestEmail: string | null;
+            guestPhone: string;
+            partySize: number;
+            reservedAt: string;
+            endsAt: string;
+            durationMinutes: number;
+            preferredZone: null | components["schemas"]["ZoneRef"];
+            status: components["schemas"]["ReservationStatus"];
+            specialRequests: string | null;
+            dietaryRestrictions: components["schemas"]["Allergen"][];
+            language: components["schemas"]["Language"];
+            tables: components["schemas"]["TableRef"][];
+            seatedAt: string | null;
+            completedAt: string | null;
+            cancelledAt: string | null;
+            createdAt: string;
+        };
+        AvailabilityOption: {
+            tables: components["schemas"]["TableRef"][];
+            zoneCode: string;
+            capacity: number;
+            isMerged: boolean;
+        };
+        LocalSlot: {
+            date: components["schemas"]["LocalDate"];
+            time: components["schemas"]["LocalTime"];
+        };
+        SlotAvailability: {
+            time: components["schemas"]["LocalTime"];
+            shift: string;
+            isBookable: boolean;
+            options: number;
+        };
+        ZoneFit: {
+            zoneId: string;
+            zoneCode: string;
+            minPartySize: number;
+            maxPartySize: number;
+            fitsParty: boolean;
+        };
+        DayAvailability: {
+            date: components["schemas"]["LocalDate"];
+            partySize: number;
+            zoneId: string | null;
+            isOpen: boolean;
+            slots: components["schemas"]["SlotAvailability"][];
+            zones: components["schemas"]["ZoneFit"][];
+        };
+        Availability: {
+            date: components["schemas"]["LocalDate"];
+            time: components["schemas"]["LocalTime"];
+            partySize: number;
+            isBookable: boolean;
+            durationMinutes: number;
+            options: components["schemas"]["AvailabilityOption"][];
+            alternativeTimes: components["schemas"]["LocalSlot"][];
+        };
+        PredictedTable: {
+            id: string;
+            code: string;
+            zoneCode: string;
+            capacity: number;
+        };
+        WaitEstimate: {
+            predictionId: string | null;
