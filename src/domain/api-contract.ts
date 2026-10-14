@@ -792,3 +792,401 @@ export interface components {
         };
         WaitEstimate: {
             predictionId: string | null;
+            estimatedWaitMinutes: number;
+            confidence: number;
+            strategy: components["schemas"]["AssignmentStrategy"];
+            tables: components["schemas"]["PredictedTable"][];
+            reasoning: string;
+            alternatives: {
+                strategy: components["schemas"]["AssignmentStrategy"];
+                tables: components["schemas"]["PredictedTable"][];
+                estimatedWaitMinutes: number;
+                note: string;
+            }[];
+            model: string;
+            isFallback: boolean;
+            generatedAt: string;
+        };
+        WaitEstimateRequest: {
+            partySize: number;
+            preferredZoneId?: string | null;
+            dietaryRestrictions?: components["schemas"]["Allergen"][];
+            language?: components["schemas"]["Language"];
+        };
+        CreatedReservation: {
+            reservation: components["schemas"]["Reservation"];
+            assignment: components["schemas"]["WaitEstimate"];
+        };
+        NewWaitlistEntry: {
+            guestName: string;
+            guestPhone: string;
+            partySize: number;
+            preferredZoneId?: string | null;
+            dietaryRestrictions?: components["schemas"]["Allergen"][];
+            notes?: string | null;
+        };
+        WaitlistEntry: {
+            id: string;
+            ticketCode: string;
+            guestName: string;
+            guestPhone: string;
+            partySize: number;
+            preferredZoneId: string | null;
+            preferredZoneCode: string | null;
+            status: components["schemas"]["WaitlistStatus"];
+            estimatedWaitMinutes: number | null;
+            remainingWaitMinutes: number | null;
+            quotedAt: string | null;
+            dietaryRestrictions: components["schemas"]["Allergen"][];
+            notes: string | null;
+            language: components["schemas"]["Language"];
+            joinedAt: string;
+            notifiedAt: string | null;
+            seatedAt: string | null;
+            minutesWaiting: number;
+            queuePosition: number | null;
+        };
+        JoinedWaitlist: {
+            entry: components["schemas"]["WaitlistEntry"];
+            prediction: components["schemas"]["WaitEstimate"];
+        };
+        SeatSuggestion: {
+            focusTableId: string;
+            entry: null | components["schemas"]["WaitlistEntry"];
+            tables: {
+                id: string;
+                code: string;
+                capacity: number;
+            }[];
+            confidence: number;
+            reasoning: string;
+            model: string;
+            isFallback: boolean;
+        };
+        ConciergeConversation: {
+            id: string;
+            language: components["schemas"]["Language"];
+            reservationId: string | null;
+            waitlistEntryId: string | null;
+            avoidedAllergens: components["schemas"]["Allergen"][];
+            createdAt: string;
+            updatedAt: string;
+        };
+        ConciergeMessage: {
+            id: string;
+            role: "user" | "assistant";
+            content: string;
+            recommendedItemIds: string[];
+            createdAt: string;
+        };
+        ConciergeTurn: {
+            conversation: components["schemas"]["ConciergeConversation"];
+            message: components["schemas"]["ConciergeMessage"];
+            recommendations: {
+                item: components["schemas"]["MenuItem"];
+                reason: string;
+            }[];
+            suggestedSequence: components["schemas"]["MenuItem"][];
+            followUpQuestion: string | null;
+            estimatedTotal: number;
+            currencyCode: string;
+            model: string;
+            isFallback: boolean;
+        };
+        LiveKpis: {
+            totalTables: number;
+            availableTables: number;
+            occupiedTables: number;
+            reservedTables: number;
+            clearingSoonTables: number;
+            totalSeats: number;
+            seatedGuests: number;
+            tableOccupancyRate: number;
+            seatEfficiencyRate: number;
+            waitingParties: number;
+            waitingGuests: number;
+            avgCurrentWaitMinutes: number;
+            upcomingReservations2h: number;
+            aiMeanAbsoluteErrorMinutes: number | null;
+        };
+        DashboardOverview: {
+            generatedAt: string;
+            kpis: components["schemas"]["LiveKpis"];
+            tables: components["schemas"]["DiningTable"][];
+            waitlist: components["schemas"]["WaitlistEntry"][];
+            upcomingReservations: components["schemas"]["Reservation"][];
+        };
+        AccuracySummary: {
+            sampleSize: number;
+            meanSignedErrorMinutes: number | null;
+            meanAbsoluteErrorMinutes: number | null;
+            withinFiveMinutesRate: number | null;
+        };
+        AIAccuracy: {
+            last7Days: components["schemas"]["AccuracySummary"];
+            last30Days: components["schemas"]["AccuracySummary"];
+            recent: {
+                predictionId: string;
+                waitlistEntryId: string;
+                partySize: number;
+                estimatedWaitMinutes: number;
+                actualWaitMinutes: number;
+                errorMinutes: number;
+                isFallback: boolean;
+                model: string;
+                createdAt: string;
+            }[];
+        };
+        DiningDurationStat: {
+            zoneCode: string;
+            partyBucket: "1-2" | "3-4" | "5-6" | "7+";
+            sampleSize: number;
+            avgMinutes: number;
+            medianMinutes: number;
+            p80Minutes: number;
+        };
+        LiveEvent: {
+            name: "tables.updated" | "waitlist.updated" | "reservations.updated" | "kpis.updated";
+            occurredAt: string;
+            payload: {
+                [key: string]: unknown;
+            };
+        };
+        HealthEnvelope: {
+            success: true;
+            data: {
+                [key: string]: unknown;
+            };
+        };
+        RestaurantInfoEnvelope: {
+            success: true;
+            data: components["schemas"]["RestaurantInfo"];
+        };
+        ZoneListEnvelope: {
+            success: true;
+            data: components["schemas"]["Zone"][];
+        };
+        MenuEnvelope: {
+            success: true;
+            data: components["schemas"]["Menu"];
+        };
+        DayAvailabilityEnvelope: {
+            success: true;
+            data: components["schemas"]["DayAvailability"];
+        };
+        AvailabilityEnvelope: {
+            success: true;
+            data: components["schemas"]["Availability"];
+        };
+        ReservationEnvelope: {
+            success: true;
+            data: components["schemas"]["Reservation"];
+        };
+        ReservationListEnvelope: {
+            success: true;
+            data: components["schemas"]["Reservation"][];
+        };
+        CreatedReservationEnvelope: {
+            success: true;
+            data: components["schemas"]["CreatedReservation"];
+        };
+        WaitEstimateEnvelope: {
+            success: true;
+            data: components["schemas"]["WaitEstimate"];
+        };
+        SeatSuggestionEnvelope: {
+            success: true;
+            data: components["schemas"]["SeatSuggestion"];
+        };
+        WaitlistEntryEnvelope: {
+            success: true;
+            data: components["schemas"]["WaitlistEntry"];
+        };
+        WaitlistListEnvelope: {
+            success: true;
+            data: components["schemas"]["WaitlistEntry"][];
+        };
+        JoinedWaitlistEnvelope: {
+            success: true;
+            data: components["schemas"]["JoinedWaitlist"];
+        };
+        TableEnvelope: {
+            success: true;
+            data: components["schemas"]["DiningTable"];
+        };
+        TableListEnvelope: {
+            success: true;
+            data: components["schemas"]["DiningTable"][];
+        };
+    };
+    responses: {
+        ValidationError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        ConflictError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        BusinessRuleError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+        RateLimited: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorEnvelope"];
+            };
+        };
+    };
+    parameters: {
+        Id: string;
+    };
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
+}
+export type $defs = Record<string, never>;
+export interface operations {
+    staffLogin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffSessionEnvelope"];
+                };
+            };
+            400: components["responses"]["ValidationError"];
+            401: components["responses"]["Unauthorized"];
+            429: components["responses"]["RateLimited"];
+        };
+    };
+    currentStaff: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMemberEnvelope"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HealthEnvelope"];
+                };
+            };
+        };
+    };
+    getRestaurantInfo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RestaurantInfoEnvelope"];
+                };
+            };
+        };
+    };
+    listZones: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ZoneListEnvelope"];
+                };
+            };
+        };
+    };
