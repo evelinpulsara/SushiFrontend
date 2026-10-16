@@ -60,3 +60,26 @@ src/
     ├── format/Formatter.ts Currency / dates / times in the restaurant timezone
     └── services/           ServiceRegistry (composition root), RestaurantDirectory,
                             MenuCatalog, ReservationManager, WaitlistManager,
+                            HostOperations, ConciergeSession, LiveEventStream
+```
+
+### Guests vs. staff
+
+Guests use the public site without an account (their booking/ticket code is the credential).
+Staff sign in at `/login`; `StaffSessionStore` keeps the JWT (validated with zod when read back
+from `localStorage`, synced across tabs with the `storage` event and signed out exactly at expiry).
+`StaffGate` hides staff pages on the client, but the real protection is the API (401/403).
+`ApiClient` adds `Authorization: Bearer`, and the host WebSocket sends the token as a subprotocol.
+The Service Worker never caches requests that carry an `Authorization` header.
+
+| Demo account | Password | Access |
+|---|---|---|
+| `admin@kurenai.demo` | `Kurenai2026!` | Dashboard + Lab |
+| `anfitrion@kurenai.demo` | `Kurenai2026!` | Dashboard |
+
+### Internationalization
+
+- `es.ts` is the source of truth; `en.ts` is typed as `Dictionary`, so a missing English key
+  is a compile error.
+- The server always renders Spanish; the stored choice (`localStorage`) is restored after
+  hydration. `LanguageManager` is a tiny observable store consumed with `useSyncExternalStore`.
