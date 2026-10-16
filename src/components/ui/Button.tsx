@@ -35,3 +35,41 @@ export function buttonClasses(variant: Variant = 'primary', size: Size = 'md', c
     'active:scale-[0.98] whitespace-nowrap',
     VARIANTS[variant],
     SIZES[size],
+    className,
+  ].join(' ');
+}
+
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  icon,
+  loading = false,
+  className = '',
+  children,
+  disabled,
+  type = 'button',
+  ...rest
+}: CommonProps & { loading?: boolean } & ButtonHTMLAttributes<HTMLButtonElement>) {
+  return (
+    <button type={type} className={buttonClasses(variant, size, className)} disabled={disabled || loading} {...rest}>
+      {loading ? <Spinner className="size-4" /> : icon}
+      {children}
+    </button>
+  );
+}
+
+export function ButtonLink({
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  className = '',
+  children,
+}: CommonProps & { href: string }) {
+  return (
+    <Link href={href} className={buttonClasses(variant, size, className)}>
+      {icon}
+      {children}
+    </Link>
+  );
+}
