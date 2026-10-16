@@ -28,3 +28,34 @@ export class Formatter {
 
   public clock(iso: string | Date): string {
     return this.time.format(typeof iso === 'string' ? new Date(iso) : iso);
+  }
+
+  public longDate(iso: string | Date): string {
+    const text = this.dateLong.format(typeof iso === 'string' ? new Date(iso) : iso);
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  }
+
+  public shortLocalDate(localDate: string): string {
+    return this.dateShort.format(new Date(`${localDate}T12:00:00Z`));
+  }
+
+  public monthOf(localDate: string): string {
+    return this.month.format(new Date(`${localDate}T12:00:00Z`)).replace('.', '');
+  }
+
+  public localTime(hhmm: string): string {
+    if (this.language === 'es') return hhmm;
+    const [hours = 0, minutes = 0] = hhmm.split(':').map(Number);
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    const twelve = hours % 12 === 0 ? 12 : hours % 12;
+    return `${twelve}:${String(minutes).padStart(2, '0')} ${suffix}`;
+  }
+
+  public number(value: number): string {
+    return this.percent.format(value);
+  }
+
+  public get zone(): string {
+    return this.timezone;
+  }
+}
