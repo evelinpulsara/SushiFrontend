@@ -13,3 +13,18 @@ export function CopyButton({ value }: { value: string }) {
       await navigator.clipboard.writeText(value);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="inline-flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1 text-xs text-mist transition hover:border-gold/50 hover:text-gold"
+    >
+      {copied ? <Check className="size-3.5 text-matcha" /> : <Copy className="size-3.5" />}
+      {copied ? t.common.copied : t.common.copy}
+    </button>
+  );
+}
