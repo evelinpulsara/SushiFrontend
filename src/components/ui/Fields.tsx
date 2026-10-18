@@ -56,3 +56,62 @@ export function Stepper({
       <output aria-live="polite" className="w-10 text-center font-display text-xl font-semibold text-ivory">
         {value}
       </output>
+      <button
+        type="button"
+        aria-label="+"
+        disabled={value >= max}
+        onClick={() => onChange(Math.min(max, value + 1))}
+        className="grid size-9 place-items-center rounded-full text-mist transition hover:bg-surface-raised hover:text-ivory disabled:opacity-30"
+      >
+        <Plus className="size-4" />
+      </button>
+    </div>
+  );
+}
+
+export function Chip({
+  active,
+  onClick,
+  children,
+  disabled,
+  tone = 'torii',
+  className = '',
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+  disabled?: boolean;
+  tone?: 'torii' | 'gold';
+  className?: string;
+}) {
+  const activeStyles = tone === 'gold' ? 'border-gold/70 bg-gold/15 text-gold' : 'border-torii/70 bg-torii/15 text-ivory';
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-full border px-3.5 py-1.5 text-sm transition-all disabled:cursor-not-allowed disabled:opacity-35 ${
+        active ? activeStyles : 'border-line-strong bg-ink-soft text-mist hover:border-mist/50 hover:text-ivory'
+      } ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function AllergenPicker({ value, onChange }: { value: readonly Allergen[]; onChange: (value: Allergen[]) => void }) {
+  const { t } = useI18n();
+  const toggle = (allergen: Allergen) =>
+    onChange(value.includes(allergen) ? value.filter((item) => item !== allergen) : [...value, allergen]);
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {ALLERGENS.map((allergen) => (
+        <Chip key={allergen} active={value.includes(allergen)} onClick={() => toggle(allergen)} tone="gold" className="text-xs">
+          {t.allergens[allergen]}
+        </Chip>
+      ))}
+    </div>
+  );
+}
