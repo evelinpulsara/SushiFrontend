@@ -25,3 +25,30 @@ export function Enso({ className = '', animated = true }: { className?: string; 
         style={{ strokeDashoffset: 0 }}
       />
       <path
+        d="M156 50c-2-2-3-3-5-5"
+        stroke="currentColor"
+        strokeWidth="5"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
+  );
+}
+
+export function VerticalKanji({ text, className = '' }: { text: string; className?: string }) {
+  return (
+    <span aria-hidden="true" className={`writing-vertical font-display select-none ${className}`}>
+      {text}
+    </span>
+  );
+}
+
+export function HankoDivider({ className = '' }: { className?: string }) {
+  return (
+    <div className={`flex items-center gap-3 ${className}`} aria-hidden="true">
+      <span className="h-px flex-1 bg-gradient-to-r from-transparent to-line-strong" />
+      <span className="size-1.5 rotate-45 bg-torii" />
+      <span className="h-px flex-1 bg-gradient-to-l from-transparent to-line-strong" />
+    </div>
+  );
+}
