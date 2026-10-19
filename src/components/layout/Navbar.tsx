@@ -111,3 +111,117 @@ function NavLinks({ activePath, layout, onNavigate }: { activePath: string | nul
             className={`relative flex items-center gap-1.5 rounded-full px-2.5 py-2 text-sm whitespace-nowrap transition-colors xl:px-3 xl:text-[15px] ${
               isActive(link.href) ? 'text-ivory' : link.staffOnly ? 'text-gold/90 hover:text-gold' : 'text-mist hover:text-ivory'
             }`}
+          >
+            {link.icon && <link.icon className="size-4" aria-hidden="true" />}
+            {link.label}
+            {isActive(link.href) && <span className="absolute inset-x-3 -bottom-0.5 h-0.5 rounded-full bg-torii" aria-hidden="true" />}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ActiveNavLinks(props: { layout: Layout; onNavigate?: () => void }) {
+  const pathname = usePathname();
+  return <NavLinks activePath={pathname} {...props} />;
+}
+
+function ResponsiveNavLinks(props: { layout: Layout; onNavigate?: () => void }) {
+  return (
+    <Suspense fallback={<NavLinks activePath={null} {...props} />}>
+      <ActiveNavLinks {...props} />
+    </Suspense>
+  );
+}
+
+function StaffControl() {
+  const { t } = useI18n();
+  const { staff } = useStaffSession();
+
+  if (!staff) {
+    return (
+      <Link
+        href="/login"
+        className="flex items-center gap-1.5 rounded-full border border-line-strong px-3 py-1.5 text-sm text-mist transition hover:border-gold/50 hover:text-gold"
+        title={t.auth.title}
+      >
+        <KeyRound className="size-3.5" aria-hidden="true" />
+        {t.nav.staff}
+      </Link>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 py-1 pr-1 pl-1">
+      <span className="grid size-7 place-items-center rounded-full bg-gold font-display text-sm font-bold text-ink" aria-hidden="true">
+        {staff.displayName.slice(0, 1).toUpperCase()}
+      </span>
+      <span className="hidden max-w-32 truncate px-1 text-sm text-gold 2xl:block" title={`${t.auth.signedInAs} ${staff.displayName}`}>
+        {staff.displayName}
+      </span>
+      <button
+        type="button"
+        onClick={() => services().auth.signOut()}
+        className="grid size-7 place-items-center rounded-full text-gold transition hover:bg-gold/20"
+        aria-label={t.auth.signOut}
+        title={t.auth.signOut}
+      >
+        <LogOut className="size-3.5" />
+      </button>
+    </span>
+  );
+}
+
+export function Navbar() {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 border-b border-line/70 bg-ink/80 backdrop-blur-xl">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="group flex shrink-0 items-center gap-2.5 whitespace-nowrap" onClick={() => setOpen(false)}>
+          <ToriiMark className="size-8 text-torii transition-transform duration-500 group-hover:-translate-y-0.5" />
+          <span className="leading-none">
+            <span className="block font-display text-lg font-bold tracking-wide text-ivory">
+              {t.brand.product}
+              <span className="text-torii"> AI</span>
+            </span>
+            <span className="hidden text-xs tracking-[0.3em] text-mist uppercase sm:block">
+              {t.brand.kanji} {t.brand.restaurant}
+            </span>
+          </span>
+        </Link>
+
+        <ResponsiveNavLinks layout="desktop" />
+
+        <div className="flex items-center gap-2 sm:gap-3">
+          <LanguageSwitcher />
+          <span className="hidden sm:block">
+            <StaffControl />
+          </span>
+          <span className="hidden sm:block lg:hidden 2xl:block">
+            <ButtonLink href="/reservations" size="sm">
+              {t.nav.bookCta}
+            </ButtonLink>
+          </span>
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-full border border-line-strong text-mist lg:hidden"
+            aria-label={open ? t.nav.closeMenu : t.nav.openMenu}
+            aria-expanded={open}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <X className="size-4" /> : <MenuIcon className="size-4" />}
+          </button>
+        </div>
+      </nav>
+
+      {open && (
+        <div className="border-t border-line bg-ink/95 px-4 py-3 lg:hidden">
+          <ResponsiveNavLinks layout="mobile" onNavigate={() => setOpen(false)} />
+        </div>
+      )}
+    </header>
+  );
+}
