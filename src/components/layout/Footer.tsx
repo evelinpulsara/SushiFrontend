@@ -28,3 +28,34 @@ export function Footer() {
             <li>{t.footer.hoursLunch}</li>
             <li>{t.footer.hoursDinner}</li>
             <li className="text-smoke">{t.footer.hoursClosed}</li>
+          </ul>
+        </div>
+
+        <div className="space-y-3">
+          <ul className="grid grid-cols-2 gap-2 text-sm">
+            {[
+              { href: '/menu', label: t.nav.menu },
+              { href: '/reservations', label: t.nav.reserve },
+              { href: '/waitlist', label: t.nav.waitlist },
+              { href: '/concierge', label: t.nav.concierge },
+              { href: '/login', label: t.auth.title },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link href={link.href} className="text-mist transition-colors hover:text-torii">
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div className="relative mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+        <HankoDivider className="mb-6" />
+        <div className="flex flex-col gap-2 text-xs text-smoke sm:flex-row sm:justify-between">
+          <p>{t.footer.rights}</p>
+          <p>{t.footer.built}</p>
+        </div>
+      </div>
+    </footer>
+  );
+}
