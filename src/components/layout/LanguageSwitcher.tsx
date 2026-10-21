@@ -14,3 +14,20 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
           language === 'en' ? 'translate-x-[calc(100%+0px)]' : 'translate-x-0'
         }`}
       />
+      {LANGUAGES.map((code) => (
+        <button
+          key={code}
+          type="button"
+          lang={code}
+          aria-pressed={language === code}
+          onClick={() => setLanguage(code)}
+          className={`relative z-10 w-10 rounded-full py-1 text-xs font-semibold tracking-widest transition-colors ${
+            language === code ? 'text-ivory' : 'text-mist hover:text-ivory'
+          }`}
+        >
+          {code.toUpperCase()}
+        </button>
+      ))}
+    </div>
+  );
+}
