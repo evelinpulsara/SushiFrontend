@@ -117,3 +117,122 @@ function Features() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <SectionHeading eyebrow={t.home.featuresEyebrow} title={t.home.featuresTitle} align="center" />
+      <div className="mt-14 grid gap-5 md:grid-cols-3">
+        {features.map((feature) => (
+          <Link
+            key={feature.title}
+            href={feature.href}
+            className="group relative overflow-hidden rounded-2xl border border-line bg-surface/70 p-7 transition-all duration-300 hover:-translate-y-1 hover:border-torii/40"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute -right-3 -bottom-6 font-display text-8xl font-bold text-ivory/[0.035] transition-colors duration-500 group-hover:text-torii/[0.12]"
+            >
+              {feature.kanji}
+            </span>
+            <span className="grid size-12 place-items-center rounded-xl border border-torii/30 bg-torii/10 text-torii">
+              <feature.icon className="size-5" aria-hidden="true" />
+            </span>
+            <p className="mt-6 font-display text-sm text-gold">{feature.kanji}</p>
+            <h3 className="mt-1 font-display text-xl font-semibold text-ivory">{feature.title}</h3>
+            <p className="mt-3 text-sm leading-relaxed text-mist">{feature.text}</p>
+            <ArrowRight className="mt-5 size-4 text-smoke transition-all group-hover:translate-x-1 group-hover:text-torii" aria-hidden="true" />
+          </Link>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function FeaturedMenu() {
+  const { t } = useI18n();
+  const featured = useResource('home-featured', () => services().menu.getFeatured(6));
+
+  return (
+    <section className="relative border-y border-line bg-ink-soft/60 py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <SectionHeading eyebrow={t.home.featuredEyebrow} title={t.home.featuredTitle} />
+          <ButtonLink href="/menu" variant="secondary" icon={<ArrowRight className="size-4" />}>
+            {t.home.featuredCta}
+          </ButtonLink>
+        </div>
+        <div className="mt-12">
+          {featured.data ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {featured.data.items.map((item) => (
+                <MenuItemCard key={item.id} item={item} currencyCode={featured.data!.currencyCode} />
+              ))}
+            </div>
+          ) : (
+            <LoadingBlock label={featured.error ? t.errors.network : t.common.loading} />
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Zones() {
+  const { t, pick } = useI18n();
+  const info = useRestaurantInfo();
+
+  return (
+    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <SectionHeading eyebrow={t.home.zonesEyebrow} title={t.home.zonesTitle} />
+      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {(info.data?.zones ?? []).map((zone) => (
+          <article key={zone.id} className="group relative overflow-hidden rounded-2xl border border-line bg-gradient-to-b from-surface to-ink-soft p-6">
+            <span className="font-display text-5xl font-bold text-torii/80 transition-transform duration-500 group-hover:-translate-y-1">
+              {t.zonesKanji[zone.code] ?? ''}
+            </span>
+            <div className="mt-6 flex items-center gap-2">
+              <h3 className="font-display text-lg font-semibold">{pick(zone, 'name')}</h3>
+              {zone.isPremium && <Badge tone="gold">{t.common.premium}</Badge>}
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-mist">{pick(zone, 'description')}</p>
+          </article>
+        ))}
+        {!info.data && <LoadingBlock className="h-48 sm:col-span-2 lg:col-span-4" label={t.common.loading} />}
+      </div>
+    </section>
+  );
+}
+
+function ClosingCta() {
+  const { t } = useI18n();
+  return (
+    <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative overflow-hidden rounded-3xl border border-torii/30 bg-gradient-to-br from-torii/25 via-surface to-ink p-10 sm:p-14">
+        <div className="bg-seigaiha absolute inset-0 opacity-70" aria-hidden="true" />
+        <div className="relative flex flex-col items-start gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-xl">
+            <h2 className="font-display text-3xl font-bold text-balance sm:text-4xl">{t.home.ctaTitle}</h2>
+            <p className="mt-3 text-mist">{t.home.ctaText}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <ButtonLink href="/reservations" size="lg">
+              {t.home.ctaReserve}
+            </ButtonLink>
+            <ButtonLink href="/concierge" size="lg" variant="gold" icon={<ChefHat className="size-4" />}>
+              {t.home.ctaConcierge}
+            </ButtonLink>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function HomeView() {
+  return (
+    <>
+      <Hero />
+      <HankoDivider className="mx-auto max-w-5xl px-4" />
+      <Features />
+      <FeaturedMenu />
+      <Zones />
+      <ClosingCta />
+    </>
+  );
+}
