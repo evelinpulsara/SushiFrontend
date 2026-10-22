@@ -42,3 +42,47 @@ export class LanguageManager {
       if (LanguageManager.isLanguage(stored) && stored !== this.current) {
         this.current = stored;
         this.emit();
+      }
+    } catch {
+    }
+    this.syncDocument();
+  }
+
+  public subscribe = (listener: Listener): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  public getSnapshot = (): Language => this.current;
+
+  public getServerSnapshot = (): Language => LanguageManager.DEFAULT_LANGUAGE;
+
+  public static fill(template: string, values: Record<string, string | number>): string {
+    return template.replace(/\{(\w+)\}/g, (match, key: string) =>
+      values[key] === undefined ? match : String(values[key]),
+    );
+  }
+
+  public static isLanguage(value: unknown): value is Language {
+    return typeof value === 'string' && (LANGUAGES as readonly string[]).includes(value);
+  }
+
+  private persist(language: Language): void {
+    try {
+      window.localStorage.setItem(LanguageManager.STORAGE_KEY, language);
+    } catch {
+    }
+  }
+
+  private syncDocument(): void {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = this.current;
+    }
+  }
+
+  private emit(): void {
+    for (const listener of this.listeners) listener();
+  }
+}
+
+export const languageManager = new LanguageManager();
