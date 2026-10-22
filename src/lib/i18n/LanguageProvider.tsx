@@ -26,3 +26,31 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     languageManager.restore();
+  }, []);
+
+  const value = useMemo<LanguageContextValue>(
+    () => ({
+      language,
+      t: languageManager.dictionary(language),
+      format: new Formatter(language),
+      setLanguage: (next) => languageManager.setLanguage(next),
+      fill: (template, values) => LanguageManager.fill(template, values),
+      pick: (record, base) => {
+        const suffix = language === 'es' ? 'Es' : 'En';
+        const localized = (record as Record<string, unknown>)[`${base}${suffix}`];
+        return typeof localized === 'string' ? localized : '';
+      },
+    }),
+    [language],
+  );
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+}
+
+export function useI18n(): LanguageContextValue {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useI18n must be used inside <LanguageProvider>');
+  }
+  return context;
+}
