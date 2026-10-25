@@ -20,3 +20,26 @@ export class ServiceRegistry {
   public readonly waitlist: WaitlistManager;
   public readonly host: HostOperations;
   public readonly auth: StaffAuth;
+
+  private constructor() {
+    this.api = new ApiClient(
+      process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_URL,
+      () => languageManager.language,
+      () => staffSession.token,
+      () => staffSession.expire(),
+    );
+    this.restaurant = new RestaurantDirectory(this.api);
+    this.menu = new MenuCatalog(this.api);
+    this.reservations = new ReservationManager(this.api);
+    this.waitlist = new WaitlistManager(this.api);
+    this.host = new HostOperations(this.api);
+    this.auth = new StaffAuth(this.api, staffSession);
+  }
+
+  public static get(): ServiceRegistry {
+    ServiceRegistry.instance ??= new ServiceRegistry();
+    return ServiceRegistry.instance;
+  }
+}
+
+export const services = (): ServiceRegistry => ServiceRegistry.get();
