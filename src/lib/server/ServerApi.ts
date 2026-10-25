@@ -20,3 +20,26 @@ async function fetchData<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (!response.ok || !body.success || body.data === undefined) {
     throw new Error(body.error?.code ?? `HTTP ${response.status}`);
   }
+  return body.data;
+}
+
+export async function getCachedMenu(): Promise<Menu | null> {
+  'use cache';
+  cacheTag('menu');
+  try {
+    const menu = await fetchData<Menu>('/menu');
+    cacheLife('hours');
+    return menu;
+  } catch {
+    cacheLife('seconds');
+    return null;
+  }
+}
+
+export async function getReservationByCode(code: string): Promise<Reservation | null> {
+  try {
+    return await fetchData<Reservation>(`/reservations/code/${encodeURIComponent(code)}`, { cache: 'no-store' });
+  } catch {
+    return null;
+  }
+}
