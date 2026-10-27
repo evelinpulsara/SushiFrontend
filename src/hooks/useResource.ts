@@ -28,3 +28,34 @@ export function useResource<T>(key: string | null, loader: () => Promise<T>, ini
   const skipKey = useRef<string | null>(initialKey);
   const load = useEffectEvent(loader);
   const requestKey = key === null ? null : `${key}#${nonce}`;
+
+  useEffect(() => {
+    if (requestKey === null) return;
+    if (requestKey === skipKey.current) {
+      skipKey.current = null;
+      return;
+    }
+    let active = true;
+    load()
+      .then((data) => {
+        if (active) setState({ key: requestKey, data, error: null });
+      })
+      .catch((error: unknown) => {
+        if (active) setState((previous) => ({ key: requestKey, data: previous.data, error: toApiError(error) }));
+      });
+    return () => {
+      active = false;
+    };
+  }, [requestKey]);
+
+  const reload = useCallback(() => setNonce((value) => value + 1), []);
+  const replace = useCallback((data: T) => setState((previous) => ({ ...previous, data })), []);
+
+  return {
+    data: state.data,
+    error: state.error,
+    loading: requestKey !== null && state.key !== requestKey,
+    reload,
+    replace,
+  };
+}
