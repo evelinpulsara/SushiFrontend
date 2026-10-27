@@ -24,3 +24,26 @@ export function MenuItemCard({ item, currencyCode, reason }: { item: MenuItem; c
       >
         {item.nameJa.slice(0, 2)}
       </span>
+
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-display text-sm text-torii">{item.nameJa}</p>
+          <h3 className="mt-0.5 font-display text-lg leading-snug font-semibold text-ivory">{item.name}</h3>
+        </div>
+        <p className="shrink-0 font-display text-base font-semibold text-gold">{currency.format(item.price)}</p>
+      </div>
+
+      <p className="relative mt-3 flex-1 text-sm leading-relaxed text-mist">{pick(item, 'description')}</p>
+
+      {reason && (
+        <p className="relative mt-3 rounded-lg border border-gold/20 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-gold/90">{reason}</p>
+      )}
+
+      <div className="relative mt-4 flex flex-wrap items-center gap-1.5">
+        {item.pieces && <Badge>{fill(t.common.piecesCount, { count: item.pieces })}</Badge>}
+        {item.alcoholPercentage !== null && <Badge>{fill(t.menu.abv, { value: item.alcoholPercentage })}</Badge>}
+        {item.spiceLevel > 0 && (
+          <Badge tone="torii" className="gap-0.5">
+            <span className="sr-only">{fill(t.menu.spicy, { level: item.spiceLevel })}</span>
+            {Array.from({ length: item.spiceLevel }, (_, index) => (
+              <Flame key={index} className="size-3" aria-hidden="true" />
