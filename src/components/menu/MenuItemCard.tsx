@@ -47,3 +47,30 @@ export function MenuItemCard({ item, currencyCode, reason }: { item: MenuItem; c
             <span className="sr-only">{fill(t.menu.spicy, { level: item.spiceLevel })}</span>
             {Array.from({ length: item.spiceLevel }, (_, index) => (
               <Flame key={index} className="size-3" aria-hidden="true" />
+            ))}
+          </Badge>
+        )}
+        {item.dietaryTags
+          .filter((tag) => HIGHLIGHT_TAGS.has(tag))
+          .map((tag) => (
+            <Badge key={tag} tone={tag === 'signature' ? 'gold' : 'matcha'}>
+              {t.dietaryTags[tag]}
+            </Badge>
+          ))}
+      </div>
+
+      {!reason && pairing && (
+        <p className="relative mt-3 flex items-start gap-1.5 border-t border-line pt-3 text-xs text-smoke">
+          <Wine className="mt-0.5 size-3.5 shrink-0 text-gold/70" aria-hidden="true" />
+          <span title={t.menu.pairing}>{pairing}</span>
+        </p>
+      )}
+
+      {item.allergens.length > 0 && (
+        <p className="relative mt-2 text-xs text-smoke">
+          {t.menu.contains}: {item.allergens.map((allergen) => t.allergens[allergen]).join(' · ')}
+        </p>
+      )}
+    </article>
+  );
+}
