@@ -38,3 +38,30 @@ export function MenuView({ initialMenu = null }: { initialMenu?: Menu | null }) 
               <p className="text-xs text-smoke">{t.menu.excludeHint}</p>
             </div>
             {excluded.length > 0 && (
+              <Button variant="ghost" size="sm" onClick={() => setExcluded([])}>
+                {t.menu.clearFilters}
+              </Button>
+            )}
+          </div>
+          <div className="mt-4">
+            <AllergenPicker value={excluded} onChange={setExcluded} />
+          </div>
+        </Card>
+
+        <div className="scroll-thin sticky top-16 z-30 -mx-4 mt-6 flex gap-2 overflow-x-auto border-b border-line bg-ink/85 px-4 py-3 backdrop-blur-lg sm:mx-0 sm:rounded-full sm:border sm:px-3">
+          <Chip active={category === null} onClick={() => setCategory(null)}>
+            {t.menu.allCategories}
+          </Chip>
+          {categories.map((entry) => (
+            <Chip key={entry.slug} active={category === entry.slug} onClick={() => setCategory(entry.slug)} className="shrink-0">
+              <span className="font-display">{entry.nameJa}</span> · {pick(entry, 'name')}
+            </Chip>
+          ))}
+        </div>
+
+        <div className="mt-10 space-y-16">
+          {menu.error && !menu.data && (
+            <Notice action={<Button size="sm" variant="secondary" onClick={menu.reload}>{t.common.retry}</Button>}>
+              {errorText(menu.error)}
+            </Notice>
+          )}
