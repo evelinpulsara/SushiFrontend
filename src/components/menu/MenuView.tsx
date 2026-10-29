@@ -65,3 +65,26 @@ export function MenuView({ initialMenu = null }: { initialMenu?: Menu | null }) 
               {errorText(menu.error)}
             </Notice>
           )}
+          {!menu.data && !menu.error && <LoadingBlock label={t.common.loading} className="h-64" />}
+          {menu.data && visible.length === 0 && <p className="py-16 text-center text-mist">{t.menu.empty}</p>}
+
+          {menu.data &&
+            visible.map((entry) => (
+              <section key={entry.slug} id={entry.slug} className={`scroll-mt-36 transition-opacity ${menu.loading ? 'opacity-60' : ''}`}>
+                <div className="mb-6 flex items-end gap-4">
+                  <span className="font-display text-4xl leading-none font-bold whitespace-nowrap text-torii sm:text-5xl">{entry.nameJa}</span>
+                  <h2 className="font-display text-2xl font-semibold">{pick(entry, 'name')}</h2>
+                </div>
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {entry.items.map((item) => (
+                    <MenuItemCard key={item.id} item={item} currencyCode={menu.data!.currencyCode} />
+                  ))}
+                </div>
+                <HankoDivider className="mt-16" />
+              </section>
+            ))}
+        </div>
+      </div>
+    </>
+  );
+}
