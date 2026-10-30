@@ -41,3 +41,41 @@ export function ReservationDetailView({ code, initialReservation = null }: { cod
     <>
       <PageHeader eyebrow={t.reservation.eyebrow} title={t.reservation.detailTitle} kanji="約" />
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
+        {!data && reservation.error && (
+          <Notice>{reservation.error.code === 'RESOURCE_NOT_FOUND' ? t.reservation.notFound : errorText(reservation.error)}</Notice>
+        )}
+        {!data && !reservation.error && <LoadingBlock label={t.common.loading} className="h-72" />}
+
+        {data && (
+          <Card className="animate-rise overflow-hidden">
+            <div className="bg-washi flex flex-wrap items-center justify-between gap-4 border-b border-line p-6">
+              <div>
+                <p className="text-xs tracking-[0.3em] text-smoke uppercase">{t.reservation.codeLabel}</p>
+                <p className="font-display text-3xl font-bold tracking-widest text-gold">{data.reservationCode}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Badge tone={statusTone}>{t.statuses.reservation[data.status]}</Badge>
+                <CopyButton value={data.reservationCode} />
+              </div>
+            </div>
+
+            <dl className="grid gap-px bg-line sm:grid-cols-2">
+              {[
+                { label: t.reservation.nameLabel, value: data.guestName },
+                { label: t.reservation.when, value: `${format.longDate(data.reservedAt)} · ${format.clock(data.reservedAt)}` },
+                { label: t.reservation.partyOf, value: fill(t.common.guestsCount, { count: data.partySize }) },
+                { label: t.reservation.assignedTables, value: data.tables.map((table) => table.code).join(' + ') || '—' },
+                { label: t.reservation.zone, value: data.preferredZone ? pick(data.preferredZone, 'name') : t.common.noPreference },
+                { label: t.reservation.duration, value: fill(t.common.minutesShort, { count: data.durationMinutes }) },
+                {
+                  label: t.reservation.restrictions,
+                  value: data.dietaryRestrictions.length ? data.dietaryRestrictions.map((item) => t.allergens[item]).join(', ') : '—',
+                },
+                { label: t.reservation.requests, value: data.specialRequests ?? '—' },
+              ].map((row) => (
+                <div key={row.label} className="bg-surface p-5">
+                  <dt className="text-xs text-smoke">{row.label}</dt>
+                  <dd className="mt-1 text-sm text-ivory">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
