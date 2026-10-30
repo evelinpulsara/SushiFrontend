@@ -256,3 +256,132 @@ function BookingForm({ info }: { info: RestaurantInfo }) {
           setAllergens([]);
         }}
       />
+    );
+  }
+
+  const zoneLabel = zoneId ? pick(info.zones.find((zone) => zone.id === zoneId) ?? {}, 'name') : t.common.noPreference;
+
+  return (
+    <div className="mx-auto grid max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[1fr_380px] lg:px-8">
+      <form onSubmit={submit} className="min-w-0 pl-3.5" noValidate>
+        <Step index={1} title={t.reservation.stepParty}>
+          <div className="flex flex-wrap items-center gap-4">
+            <Stepper value={partySize} min={1} max={info.settings.maxPartySize} onChange={setPartySize} label={t.reservation.stepParty} />
+            <p className="text-xs text-smoke">{fill(t.reservation.partyHint, { max: info.settings.maxPartySize })}</p>
+          </div>
+        </Step>
+
+        <Step index={2} title={t.reservation.stepDate}>
+          <div className="scroll-thin -mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+            {days.map((candidate) => {
+              const active = candidate.date === day.date;
+              return (
+                <button
+                  key={candidate.date}
+                  type="button"
+                  disabled={!candidate.isOpen}
+                  aria-pressed={active}
+                  onClick={() => {
+                    setSelectedDate(candidate.date);
+                    setTime(null);
+                  }}
+                  className={`flex w-[4.5rem] shrink-0 flex-col items-center rounded-2xl border px-2 py-3 transition-all disabled:cursor-not-allowed disabled:opacity-35 ${
+                    active ? 'border-torii bg-torii/15 shadow-[0_10px_30px_-15px_rgba(230,57,70,0.8)]' : 'border-line-strong bg-ink-soft hover:border-mist/50'
+                  }`}
+                >
+                  <span className="text-xs text-mist uppercase">
+                    {candidate.isToday ? t.common.today : t.weekdaysShort[candidate.dayOfWeek]}
+                  </span>
+                  <span className="font-display text-2xl font-bold">{Number(candidate.date.slice(8, 10))}</span>
+                  <span className="text-[11px] text-smoke">
+                    {candidate.isOpen ? format.monthOf(candidate.date) : t.reservation.closedDay}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </Step>
+
+        <Step index={3} title={t.reservation.stepZone}>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {[null, ...info.zones].map((zone) => {
+              const active = (zone?.id ?? null) === zoneId;
+              const fit = zone ? zoneFits.get(zone.id) : undefined;
+              const fits = fit?.fitsParty ?? true;
+              return (
+                <button
+                  key={zone?.id ?? 'any'}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setZoneId(zone?.id ?? null)}
+                  className={`flex items-center gap-3 rounded-2xl border p-4 text-left transition-all ${
+                    active ? 'border-torii bg-torii/10' : 'border-line-strong bg-ink-soft hover:border-mist/50'
+                  } ${fits ? '' : 'opacity-45'}`}
+                >
+                  <span className="font-display text-2xl text-torii/90">{zone ? t.zonesKanji[zone.code] : '任'}</span>
+                  <span>
+                    <span className="block text-sm font-medium">{zone ? pick(zone, 'name') : t.common.noPreference}</span>
+                    {fit && (
+                      <span className={`block text-xs ${fits ? 'text-smoke' : 'text-torii'}`}>
+                        {fill(t.reservation.zoneRange, { min: fit.minPartySize, max: fit.maxPartySize })}
+                      </span>
+                    )}
+                    {zone?.isPremium && <span className="text-xs text-gold">{t.common.premium}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {selectedZoneFit && !selectedZoneFit.fitsParty && (
+            <div className="mt-4">
+              <Notice>
+                {fill(t.reservation.zoneTooSmall, {
+                  zone: pick(info.zones.find((zone) => zone.id === selectedZoneFit.zoneId) ?? {}, 'name'),
+                  min: selectedZoneFit.minPartySize,
+                  max: selectedZoneFit.maxPartySize,
+                })}
+              </Notice>
+            </div>
+          )}
+        </Step>
+
+        <Step index={4} title={t.reservation.stepTime}>
+          {slotGroups.length === 0 ? (
+            <p className="text-sm text-mist">{t.reservation.noTimes}</p>
+          ) : (
+            <div className="space-y-5">
+              <div className="flex flex-wrap items-center gap-4 text-xs text-smoke" aria-live="polite">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-full bg-matcha" aria-hidden="true" />
+                  {t.reservation.slotFree}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-full bg-torii" aria-hidden="true" />
+                  {t.reservation.slotFull}
+                </span>
+                {dayAvailability.loading && (
+                  <span className="flex items-center gap-1.5 text-mist">
+                    <Spinner className="size-3 text-torii" /> {t.reservation.slotsChecking}
+                  </span>
+                )}
+              </div>
+              {noFreeSlots && !(selectedZoneFit && !selectedZoneFit.fitsParty) && <Notice>{t.reservation.noSlotsForParty}</Notice>}
+              {slotGroups.map((group) => (
+                <div key={group.shift}>
+                  <p className="mb-2 text-xs tracking-[0.2em] text-smoke uppercase">{t.shifts[group.shift]}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {group.times.map((slot) => (
+                      <SlotChip
+                        key={slot}
+                        label={format.localTime(slot)}
+                        active={slot === time}
+                        status={dayAvailability.data ? slotStatus.get(slot) ?? 'past' : 'unknown'}
+                        onClick={() => setTime(slot)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Step>
