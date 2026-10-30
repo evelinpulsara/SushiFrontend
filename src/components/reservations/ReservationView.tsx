@@ -127,3 +127,132 @@ function Confirmation({ result, onReset }: { result: CreatedReservation; onReset
         <ButtonLink href={`/concierge?reservation=${reservation.reservationCode}`} variant="gold" icon={<ChefHat className="size-4" />}>
           {t.reservation.askItamae}
         </ButtonLink>
+        <Button variant="ghost" onClick={onReset}>
+          {t.reservation.newReservation}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function CodeLookup() {
+  const { t } = useI18n();
+  const router = useRouter();
+  const [code, setCode] = useState('');
+  const valid = ReservationManager.isValidCode(code);
+
+  return (
+    <Card className="p-5">
+      <h3 className="text-sm font-semibold">{t.reservation.lookupTitle}</h3>
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (valid) router.push(`/reservations/${code.trim().toUpperCase()}`);
+        }}
+      >
+        <TextInput
+          value={code}
+          onChange={(event) => setCode(event.target.value)}
+          placeholder={t.reservation.lookupPlaceholder}
+          aria-label={t.reservation.lookupTitle}
+          className="font-mono uppercase"
+        />
+        <Button type="submit" variant="secondary" disabled={!valid} icon={<Search className="size-4" />} aria-label={t.reservation.lookupButton} />
+      </form>
+    </Card>
+  );
+}
+
+function BookingForm({ info }: { info: RestaurantInfo }) {
+  const { t, fill, format, pick } = useI18n();
+  const errorText = useErrorText();
+  const directory = services().restaurant;
+  const days = directory.upcomingDays(info, BOOKING_WINDOW_DAYS);
+
+  const [partySize, setPartySize] = useState(2);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [time, setTime] = useState<string | null>(null);
+  const [zoneId, setZoneId] = useState<string | null>(null);
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [allergens, setAllergens] = useState<Allergen[]>([]);
+  const [requests, setRequests] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<ApiError | null>(null);
+  const [result, setResult] = useState<CreatedReservation | null>(null);
+
+  const day = days.find((candidate) => candidate.date === selectedDate) ?? days.find((candidate) => candidate.isOpen) ?? days[0]!;
+  const slotGroups = directory.timeSlots(info, day);
+  const validTime = time !== null && slotGroups.some((group) => group.times.includes(time));
+
+  const dayKey = day.isOpen ? `availability-day:${day.date}:${partySize}:${zoneId ?? 'any'}` : null;
+  const dayAvailability = useResource(dayKey, () =>
+    services().reservations.checkDay({ date: day.date, partySize, zoneId }),
+  );
+  const slotStatus = new Map((dayAvailability.data?.slots ?? []).map((slot) => [slot.time, slot]));
+  const zoneFits = new Map((dayAvailability.data?.zones ?? []).map((zone) => [zone.zoneId, zone]));
+  const selectedZoneFit = zoneId ? zoneFits.get(zoneId) : undefined;
+  const noFreeSlots = dayAvailability.data !== null && dayAvailability.data.slots.length > 0 && dayAvailability.data.slots.every((slot) => !slot.isBookable);
+
+  const availabilityKey = validTime ? `availability:${day.date}:${time}:${partySize}:${zoneId ?? 'any'}` : null;
+  const availability = useResource(availabilityKey, () =>
+    services().reservations.checkAvailability({ date: day.date, time: time!, partySize, zoneId }),
+  );
+
+  const canSubmit =
+    validTime && guestName.trim().length >= 2 && PHONE_PATTERN.test(guestPhone.trim()) && availability.data?.isBookable !== false;
+
+  const alternatives: LocalSlot[] =
+    (submitError?.code === 'NO_AVAILABILITY' && Array.isArray(submitError.details['alternativeTimes'])
+      ? (submitError.details['alternativeTimes'] as LocalSlot[])
+      : null) ?? availability.data?.alternativeTimes ?? [];
+
+  const chooseSlot = (slot: LocalSlot) => {
+    setSelectedDate(slot.date);
+    setTime(slot.time);
+    setSubmitError(null);
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!canSubmit || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const created = await services().reservations.create({
+        guestName: guestName.trim(),
+        guestEmail: guestEmail.trim() || null,
+        guestPhone: guestPhone.trim(),
+        partySize,
+        date: day.date,
+        time: time!,
+        preferredZoneId: zoneId,
+        specialRequests: requests.trim() || null,
+        dietaryRestrictions: allergens,
+      });
+      setResult(created);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      setSubmitError(toApiError(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (result) {
+    return (
+      <Confirmation
+        result={result}
+        onReset={() => {
+          setResult(null);
+          setTime(null);
+          dayAvailability.reload();
+          setGuestName('');
+          setGuestEmail('');
+          setGuestPhone('');
+          setRequests('');
+          setAllergens([]);
+        }}
+      />
