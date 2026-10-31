@@ -79,3 +79,31 @@ export function ReservationDetailView({ code, initialReservation = null }: { cod
                 </div>
               ))}
             </dl>
+
+            <div className="flex flex-wrap items-center gap-3 border-t border-line p-6">
+              <ButtonLink href="/reservations" variant="ghost" icon={<ArrowLeft className="size-4" />}>
+                {t.common.back}
+              </ButtonLink>
+              {(data.status === 'confirmed' || data.status === 'pending') && (
+                <>
+                  <ButtonLink href={`/concierge?reservation=${data.reservationCode}`} variant="gold" icon={<ChefHat className="size-4" />}>
+                    {t.reservation.askItamae}
+                  </ButtonLink>
+                  <Button variant="danger" onClick={cancel} loading={cancelling} className="sm:ml-auto">
+                    {t.reservation.cancelReservation}
+                  </Button>
+                </>
+              )}
+              {data.status === 'cancelled' && <p className="text-sm text-mist sm:ml-auto">{t.reservation.cancelledNotice}</p>}
+            </div>
+            {actionError && (
+              <div className="px-6 pb-6">
+                <Notice>{errorText(actionError)}</Notice>
+              </div>
+            )}
+          </Card>
+        )}
+      </div>
+    </>
+  );
+}
