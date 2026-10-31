@@ -385,3 +385,70 @@ function BookingForm({ info }: { info: RestaurantInfo }) {
             </div>
           )}
         </Step>
+
+        <Step index={5} title={t.reservation.stepDetails}>
+          <div className="grid gap-5 sm:grid-cols-2">
+            <Field label={t.reservation.nameLabel} htmlFor="guest-name">
+              <TextInput id="guest-name" autoComplete="name" required value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder={t.reservation.namePlaceholder} />
+            </Field>
+            <Field label={t.reservation.phoneLabel} htmlFor="guest-phone">
+              <TextInput id="guest-phone" type="tel" autoComplete="tel" required value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder={t.reservation.phonePlaceholder} />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label={`${t.reservation.emailLabel} (${t.common.optional})`} htmlFor="guest-email">
+                <TextInput id="guest-email" type="email" autoComplete="email" value={guestEmail} onChange={(event) => setGuestEmail(event.target.value)} placeholder={t.reservation.emailPlaceholder} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label={t.reservation.allergiesLabel} hint={t.reservation.allergiesHint}>
+                <AllergenPicker value={allergens} onChange={setAllergens} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label={`${t.reservation.requestsLabel} (${t.common.optional})`} htmlFor="requests">
+                <TextArea id="requests" maxLength={500} value={requests} onChange={(event) => setRequests(event.target.value)} placeholder={t.reservation.requestsPlaceholder} />
+              </Field>
+            </div>
+          </div>
+
+          {submitError && submitError.code !== 'NO_AVAILABILITY' && (
+            <div className="mt-6">
+              <Notice>{errorText(submitError)}</Notice>
+            </div>
+          )}
+
+          <Button type="submit" size="lg" className="mt-8 w-full sm:w-auto" disabled={!canSubmit} loading={submitting}>
+            {submitting ? t.reservation.submitting : t.reservation.submit}
+          </Button>
+        </Step>
+      </form>
+
+      <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+        <Card className="overflow-hidden">
+          <div className="border-b border-line bg-washi p-5">
+            <p className="text-xs tracking-[0.25em] text-torii uppercase">{t.reservation.summaryTitle}</p>
+            <ul className="mt-4 space-y-3 text-sm">
+              <li className="flex items-center gap-3">
+                <Users className="size-4 text-gold" aria-hidden="true" />
+                {partySize === 1 ? t.common.guestOne : fill(t.common.guestsCount, { count: partySize })}
+              </li>
+              <li className="flex items-center gap-3">
+                <CalendarDays className="size-4 text-gold" aria-hidden="true" />
+                {t.weekdays[day.dayOfWeek]} {format.shortLocalDate(day.date)}
+              </li>
+              <li className="flex items-center gap-3">
+                <Clock className="size-4 text-gold" aria-hidden="true" />
+                {validTime ? format.localTime(time!) : '—'}
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="w-4 text-center font-display text-gold">間</span>
+                {zoneLabel}
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-4 p-5 text-sm" aria-live="polite">
+            {!validTime && <p className="text-mist">{t.reservation.summaryEmpty}</p>}
+            {validTime && availability.loading && (
+              <p className="flex items-center gap-2 text-mist">
+                <Spinner className="size-4 text-torii" /> {t.reservation.checking}
