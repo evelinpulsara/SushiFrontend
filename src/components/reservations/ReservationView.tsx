@@ -452,3 +452,66 @@ function BookingForm({ info }: { info: RestaurantInfo }) {
             {validTime && availability.loading && (
               <p className="flex items-center gap-2 text-mist">
                 <Spinner className="size-4 text-torii" /> {t.reservation.checking}
+              </p>
+            )}
+            {validTime && !availability.loading && availability.error && <Notice>{errorText(availability.error)}</Notice>}
+            {validTime && !availability.loading && availability.data && (
+              availability.data.isBookable && submitError?.code !== 'NO_AVAILABILITY' ? (
+                <div className="space-y-2">
+                  <Badge tone="matcha">{fill(t.reservation.available, { count: availability.data.options.length })}</Badge>
+                  <p className="text-xs text-smoke">{fill(t.reservation.holdDuration, { minutes: availability.data.durationMinutes })}</p>
+                </div>
+              ) : (
+                <Badge tone="torii">{t.reservation.unavailable}</Badge>
+              )
+            )}
+
+            {validTime && (availability.data?.isBookable === false || submitError?.code === 'NO_AVAILABILITY') && (
+              <div className="space-y-3">
+                {alternatives.length > 0 && (
+                  <>
+                    <p className="text-xs tracking-[0.2em] text-smoke uppercase">{t.reservation.alternativesTitle}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {alternatives.map((slot) => (
+                        <Chip key={`${slot.date}-${slot.time}`} active={false} onClick={() => chooseSlot(slot)} tone="gold">
+                          {format.localTime(slot.time)}
+                        </Chip>
+                      ))}
+                    </div>
+                  </>
+                )}
+                <ButtonLink href="/waitlist" variant="secondary" size="sm">
+                  {t.reservation.joinWaitlist}
+                </ButtonLink>
+              </div>
+            )}
+          </div>
+        </Card>
+        <CodeLookup />
+      </aside>
+    </div>
+  );
+}
+
+export function ReservationView() {
+  const { t } = useI18n();
+  const errorText = useErrorText();
+  const info = useRestaurantInfo();
+
+  return (
+    <>
+      <PageHeader eyebrow={t.reservation.eyebrow} title={t.reservation.title} subtitle={t.reservation.subtitle} kanji="予" />
+      {info.data ? (
+        <BookingForm info={info.data} />
+      ) : (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {info.error ? (
+            <Notice action={<Button size="sm" variant="secondary" onClick={info.reload}>{t.common.retry}</Button>}>{errorText(info.error)}</Notice>
+          ) : (
+            <LoadingBlock label={t.common.loading} className="h-96" />
+          )}
+        </div>
+      )}
+    </>
+  );
+}
