@@ -69,3 +69,65 @@ export function WaitlistView() {
       router.push(`/waitlist/${joined.entry.ticketCode}`);
     } catch (failure) {
       setError(toApiError(failure));
+      setJoining(false);
+    }
+  };
+
+  return (
+    <>
+      <PageHeader eyebrow={t.waitlist.eyebrow} title={t.waitlist.title} subtitle={t.waitlist.subtitle} kanji="待" />
+
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="flex items-start gap-4">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-torii/30 bg-torii/10 text-torii">
+                <Bot className="size-5" aria-hidden="true" />
+              </span>
+              <div>
+                <h2 className="font-display text-xl font-semibold">{t.waitlist.estimateTitle}</h2>
+                <p className="text-sm text-mist">{t.waitlist.estimateText}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-5">
+              <Field label={t.reservation.stepParty}>
+                <div>
+                  <Stepper value={partySize} min={1} max={maxParty} onChange={(value) => { setPartySize(value); setEstimate(null); }} label={t.reservation.stepParty} />
+                </div>
+              </Field>
+              <Field label={t.reservation.stepZone}>
+                <div className="flex flex-wrap gap-2">
+                  <Chip active={zoneId === null} onClick={() => { setZoneId(null); setEstimate(null); }}>
+                    {t.common.noPreference}
+                  </Chip>
+                  {(info.data?.zones ?? []).map((zone) => (
+                    <Chip key={zone.id} active={zoneId === zone.id} onClick={() => { setZoneId(zone.id); setEstimate(null); }}>
+                      <span className="font-display text-torii/90">{t.zonesKanji[zone.code]}</span> {pick(zone, 'name')}
+                    </Chip>
+                  ))}
+                </div>
+              </Field>
+              <Field label={t.reservation.allergiesLabel} hint={t.reservation.allergiesHint}>
+                <AllergenPicker value={allergens} onChange={setAllergens} />
+              </Field>
+              <Button onClick={runEstimate} loading={estimating} variant="gold" icon={<Bot className="size-4" />}>
+                {estimating ? t.waitlist.estimating : t.waitlist.estimateButton}
+              </Button>
+            </div>
+          </Card>
+
+          {estimate && <WaitEstimateCard estimate={estimate} zoneName={info.zoneName} />}
+        </div>
+
+        <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+          <Card className="overflow-hidden">
+            <div className="bg-washi border-b border-line p-6">
+              <h2 className="flex items-center gap-2 font-display text-xl font-semibold">
+                <Ticket className="size-5 text-torii" aria-hidden="true" />
+                {t.waitlist.joinTitle}
+              </h2>
+              <p className="mt-1 text-sm text-mist">{t.waitlist.joinText}</p>
+            </div>
+            <form onSubmit={join} className="space-y-5 p-6" noValidate>
+              <Field label={t.reservation.nameLabel} htmlFor="wl-name">
