@@ -131,3 +131,48 @@ export function WaitlistView() {
             </div>
             <form onSubmit={join} className="space-y-5 p-6" noValidate>
               <Field label={t.reservation.nameLabel} htmlFor="wl-name">
+                <TextInput id="wl-name" autoComplete="name" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder={t.reservation.namePlaceholder} />
+              </Field>
+              <Field label={t.reservation.phoneLabel} htmlFor="wl-phone">
+                <TextInput id="wl-phone" type="tel" autoComplete="tel" value={guestPhone} onChange={(event) => setGuestPhone(event.target.value)} placeholder={t.reservation.phonePlaceholder} />
+              </Field>
+              <Field label={`${t.waitlist.notesLabel} (${t.common.optional})`} htmlFor="wl-notes">
+                <TextArea id="wl-notes" maxLength={500} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={t.waitlist.notesPlaceholder} />
+              </Field>
+              {error && <Notice>{errorText(error)}</Notice>}
+              <Button type="submit" size="lg" className="w-full" disabled={!canJoin} loading={joining}>
+                {joining ? t.waitlist.joining : t.waitlist.joinButton}
+              </Button>
+            </form>
+          </Card>
+
+          <Card className="p-5">
+            <h3 className="text-sm font-semibold">{t.waitlist.lookupTitle}</h3>
+            <form
+              className="mt-3 flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (WaitlistManager.isValidTicket(ticketQuery)) router.push(`/waitlist/${ticketQuery.trim().toUpperCase()}`);
+              }}
+            >
+              <TextInput
+                value={ticketQuery}
+                onChange={(event) => setTicketQuery(event.target.value)}
+                placeholder={t.waitlist.lookupPlaceholder}
+                aria-label={t.waitlist.lookupTitle}
+                className="font-mono uppercase"
+              />
+              <Button
+                type="submit"
+                variant="secondary"
+                disabled={!WaitlistManager.isValidTicket(ticketQuery)}
+                icon={<Search className="size-4" />}
+                aria-label={t.reservation.lookupButton}
+              />
+            </form>
+          </Card>
+        </div>
+      </div>
+    </>
+  );
+}
