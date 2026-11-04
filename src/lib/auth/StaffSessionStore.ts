@@ -58,3 +58,63 @@ export class StaffSessionStore {
 
   public signOut(): void {
     this.update(null, false);
+    this.forget();
+  }
+
+  public expire(): void {
+    if (!this.session) return;
+    this.update(null, true);
+    this.forget();
+  }
+
+  public restore(): void {
+    if (this.restored || typeof window === 'undefined') return;
+    this.restored = true;
+    window.addEventListener('storage', (event) => {
+      if (event.key === StaffSessionStore.STORAGE_KEY) this.update(this.read(), false);
+    });
+    this.update(this.read(), false);
+  }
+
+  public subscribe = (listener: Listener): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  public getSnapshot = (): StaffSnapshot => this.snapshot;
+
+  public getServerSnapshot = (): StaffSnapshot => StaffSessionStore.SERVER_SNAPSHOT;
+
+  private read(): StaffSession | null {
+    try {
+      const raw = window.localStorage.getItem(StaffSessionStore.STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = storedSessionSchema.safeParse(JSON.parse(raw));
+      if (!parsed.success || Date.parse(parsed.data.expiresAt) <= Date.now()) return null;
+      return parsed.data;
+    } catch {
+      return null;
+    }
+  }
+
+  private forget(): void {
+    try {
+      window.localStorage.removeItem(StaffSessionStore.STORAGE_KEY);
+    } catch {
+    }
+  }
+
+  private update(session: StaffSession | null, expired: boolean): void {
+    this.session = session;
+    if (this.expiryTimer !== null) window.clearTimeout(this.expiryTimer);
+    this.expiryTimer = null;
+    if (session) {
+      const remaining = Math.min(Date.parse(session.expiresAt) - Date.now(), 2_147_000_000);
+      this.expiryTimer = window.setTimeout(() => this.expire(), Math.max(0, remaining));
+    }
+    this.snapshot = { status: session ? 'signed-in' : 'signed-out', staff: session?.staff ?? null, expired };
+    for (const listener of this.listeners) listener();
+  }
+}
+
+export const staffSession = new StaffSessionStore();
