@@ -127,3 +127,47 @@ export function TicketView({ ticketCode }: { ticketCode: string }) {
                   <div>
                     <dt className="text-xs text-smoke">{t.waitlist.waited}</dt>
                     <dd className="font-display text-3xl font-bold text-ivory">{fill(t.common.minutesShort, { count: entry.minutesWaiting })}</dd>
+                  </div>
+                </dl>
+                <p className="text-xs text-smoke">
+                  {t.waitlist.remaining}
+                  {entry.quotedAt ? ` · ${fill(t.waitlist.quotedAt, { time: format.clock(entry.quotedAt) })}` : ''}
+                </p>
+                {isActive && (
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="gold" onClick={reestimate} loading={busy === 'reestimate'} icon={<RefreshCw className="size-4" />}>
+                      {busy === 'reestimate' ? t.waitlist.reestimating : t.waitlist.reestimate}
+                    </Button>
+                    <Button variant="ghost" onClick={leave} loading={busy === 'cancel'}>
+                      {t.waitlist.cancel}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+            {actionError && (
+              <div className="px-8 pb-6">
+                <Notice>{errorText(actionError)}</Notice>
+              </div>
+            )}
+          </Card>
+        )}
+
+        {prediction && <WaitEstimateCard estimate={prediction} zoneName={zoneName} />}
+
+        {entry && isActive && (
+          <Card className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center">
+            <span className="font-display text-4xl text-torii">板前</span>
+            <div className="flex-1">
+              <h2 className="font-display text-lg font-semibold">{t.waitlist.whileWaitingTitle}</h2>
+              <p className="text-sm text-mist">{t.waitlist.whileWaitingText}</p>
+            </div>
+            <ButtonLink href={`/concierge?ticket=${entry.ticketCode}`} variant="gold" icon={<ChefHat className="size-4" />}>
+              {t.waitlist.whileWaitingCta}
+            </ButtonLink>
+          </Card>
+        )}
+      </div>
+    </>
+  );
+}
