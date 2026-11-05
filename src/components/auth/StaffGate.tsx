@@ -25,3 +25,30 @@ export function StaffGate({ roles = [], children }: { roles?: StaffRole[]; child
   }
 
   if (session.status === 'signed-out' || !session.staff) {
+    return (
+      <>
+        <PageHeader eyebrow={t.auth.eyebrow} title={t.auth.title} subtitle={t.auth.subtitle} kanji="鍵" />
+        <div className="mx-auto max-w-4xl px-4 pb-20 sm:px-6">
+          <StaffLoginCard notice={session.expired ? t.auth.expired : null} />
+        </div>
+      </>
+    );
+  }
+
+  if (roles.length > 0 && !roles.includes(session.staff.role)) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-20 sm:px-6">
+        <Card className="p-8 text-center">
+          <ShieldAlert className="mx-auto size-10 text-gold" aria-hidden="true" />
+          <h1 className="mt-4 font-display text-2xl font-semibold">{t.auth.forbiddenTitle}</h1>
+          <p className="mt-2 text-mist">{fill(t.auth.forbiddenText, { role: t.auth.roles[session.staff.role] })}</p>
+          <Button className="mt-6" variant="secondary" onClick={() => services().auth.signOut()}>
+            {t.auth.switchAccount}
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+}
