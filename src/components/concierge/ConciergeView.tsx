@@ -117,3 +117,123 @@ export function ConciergeView({ reservationCode, ticketCode }: { reservationCode
     const content = text.trim();
     if (!content || busy) return;
     setBusy(true);
+    setError(null);
+    setDraft('');
+    setHistory([...session.history, { id: 'pending', role: 'user', content, turn: null }]);
+    try {
+      setHistory(await session.send(content, allergens));
+    } catch (failure) {
+      setError(toApiError(failure));
+      setHistory(session.history);
+      setDraft(content);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    void send(draft);
+  };
+
+  const restart = () => {
+    setSession(new ConciergeSession(services().api, { reservationCode, ticketCode }));
+    setHistory([]);
+    setError(null);
+  };
+
+  const linkedCode = reservationCode ?? ticketCode;
+
+  return (
+    <>
+      <PageHeader eyebrow={t.concierge.eyebrow} title={t.concierge.title} subtitle={t.concierge.subtitle} kanji="板" />
+
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 sm:px-6 lg:grid-cols-[320px_1fr] lg:px-8">
+        <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
+          {linkedCode && (
+            <Badge tone="gold" className="px-3 py-1 text-xs">
+              {fill(t.concierge.linked, { code: linkedCode })}
+            </Badge>
+          )}
+          <Card className="p-5">
+            <h2 className="text-sm font-semibold">{t.concierge.allergiesTitle}</h2>
+            <p className="mt-1 mb-4 text-xs text-smoke">{t.concierge.allergiesHint}</p>
+            <AllergenPicker value={allergens} onChange={setAllergens} />
+            <p className="mt-4 text-xs text-smoke">{t.concierge.allergyNotice}</p>
+          </Card>
+          <Card className="p-5">
+            <h2 className="mb-3 text-sm font-semibold">{t.concierge.suggestionsTitle}</h2>
+            <ul className="space-y-2">
+              {t.concierge.suggestions.map((suggestion) => (
+                <li key={suggestion}>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void send(suggestion)}
+                    className="w-full rounded-xl border border-line-strong bg-ink-soft px-3 py-2 text-left text-sm text-mist transition hover:border-torii/40 hover:text-ivory disabled:opacity-50"
+                  >
+                    {suggestion}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </Card>
+          {history.length > 0 && (
+            <Button variant="ghost" size="sm" onClick={restart} icon={<RotateCcw className="size-4" />} disabled={busy}>
+              {t.concierge.newChat}
+            </Button>
+          )}
+        </aside>
+
+        <Card className="flex min-h-[640px] flex-col overflow-hidden">
+          <div className="scroll-thin flex-1 space-y-6 overflow-y-auto p-5 sm:p-6" aria-live="polite">
+            <div className="flex gap-3">
+              <ItamaeAvatar />
+              <p className="rounded-2xl rounded-tl-md border border-line bg-surface-raised px-4 py-3 text-sm leading-relaxed text-ivory/95">
+                {t.concierge.greeting}
+              </p>
+            </div>
+
+            {history.map((entry) => (
+              <MessageBubble key={entry.id} entry={entry} onFollowUp={(text) => void send(text)} busy={busy} />
+            ))}
+
+            {busy && (
+              <div className="flex items-center gap-3 text-sm text-mist">
+                <ItamaeAvatar />
+                <Spinner className="size-4 text-torii" />
+                {t.concierge.thinking}
+              </div>
+            )}
+            {error && <Notice>{errorText(error)}</Notice>}
+            <div ref={endRef} />
+          </div>
+
+          <form onSubmit={submit} className="flex items-end gap-3 border-t border-line bg-ink-soft/70 p-4">
+            <label htmlFor="concierge-input" className="sr-only">
+              {t.concierge.placeholder}
+            </label>
+            <textarea
+              id="concierge-input"
+              value={draft}
+              maxLength={1000}
+              rows={1}
+              onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  void send(draft);
+                }
+              }}
+              placeholder={t.concierge.placeholder}
+              className="max-h-40 min-h-11 flex-1 resize-none rounded-2xl border border-line-strong bg-ink px-4 py-3 text-sm text-ivory placeholder:text-smoke focus:border-torii/70 focus:outline-none focus:ring-2 focus:ring-torii/20"
+            />
+            <Button type="submit" size="lg" disabled={!draft.trim()} loading={busy} icon={<Send className="size-4" />} aria-label={t.concierge.send}>
+              <span className="hidden sm:inline">{t.concierge.send}</span>
+            </Button>
+          </form>
+        </Card>
+      </div>
+    </>
+  );
+}
