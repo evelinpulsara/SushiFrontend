@@ -21,3 +21,27 @@ export class HostOperations {
 
   public getAIAccuracy(): Promise<AIAccuracy> {
     return this.api.get<AIAccuracy>('/dashboard/ai-accuracy');
+  }
+
+  public updateTableStatus(tableId: string, status: TableStatus): Promise<DiningTable> {
+    return this.api.patch<DiningTable>(`/tables/${tableId}/status`, { status });
+  }
+
+  public seatWalkIn(input: { tableIds: string[]; guestName: string; partySize: number }): Promise<unknown> {
+    return this.api.post('/seatings', input);
+  }
+
+  public releaseSeating(seatingId: string): Promise<unknown> {
+    return this.api.post(`/seatings/${seatingId}/release`);
+  }
+
+  public allowedTransitions(table: DiningTable): readonly TableStatus[] {
+    return MANUAL_TRANSITIONS[table.status];
+  }
+
+  public freeTables(tables: readonly DiningTable[]): DiningTable[] {
+    return tables
+      .filter((table) => table.isActive && table.status === 'available')
+      .sort((a, b) => a.capacity - b.capacity || a.code.localeCompare(b.code));
+  }
+}
