@@ -33,3 +33,38 @@ export function KpiGrid({ kpis }: { kpis: LiveKpis }) {
       value: String(kpis.waitingParties),
       hint: fill(t.dashboard.kpis.waitingGuests, { count: kpis.waitingGuests }),
       accent: 'text-aiiro',
+    },
+    { icon: Hourglass, label: t.dashboard.kpis.avgWait, value: fill(t.common.minutesShort, { count: kpis.avgCurrentWaitMinutes }), accent: 'text-mist' },
+    { icon: CalendarDays, label: t.dashboard.kpis.upcoming, value: String(kpis.upcomingReservations2h), accent: 'text-gold' },
+    {
+      icon: Bot,
+      label: t.dashboard.kpis.aiAccuracy,
+      value:
+        kpis.aiMeanAbsoluteErrorMinutes === null
+          ? '—'
+          : fill(t.dashboard.kpis.aiAccuracyValue, { value: kpis.aiMeanAbsoluteErrorMinutes }),
+      hint: kpis.aiMeanAbsoluteErrorMinutes === null ? t.dashboard.kpis.aiAccuracyEmpty : undefined,
+      accent: 'text-torii',
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      {items.map((item) => (
+        <div key={item.label} className="rounded-2xl border border-line bg-surface/80 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-xs tracking-wide text-smoke uppercase">{item.label}</p>
+            <item.icon className={`size-4 ${item.accent}`} aria-hidden="true" />
+          </div>
+          <p className="mt-2 font-display text-2xl font-bold text-ivory tabular-nums sm:text-3xl">{item.value}</p>
+          {item.meter !== undefined && (
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-line" aria-hidden="true">
+              <div className="h-full rounded-full bg-gradient-to-r from-torii to-gold transition-all duration-700" style={{ width: `${Math.min(100, item.meter)}%` }} />
+            </div>
+          )}
+          {item.hint && <p className="mt-1.5 text-xs text-smoke">{item.hint}</p>}
+        </div>
+      ))}
+    </div>
+  );
+}
