@@ -87,3 +87,93 @@ export function TableDetailPanel({ table, actions }: { table: DiningTable | null
           </div>
         )}
 
+        {table.nextReservation && (
+          <p className="rounded-xl border border-gold/25 bg-gold/5 px-4 py-3 text-xs text-gold">
+            {fill(t.dashboard.nextBooking, { code: table.nextReservation.reservationCode, minutes: Math.max(0, table.nextReservation.minutesUntil) })} ·{' '}
+            {table.nextReservation.guestName} ({table.nextReservation.partySize}) · {format.clock(table.nextReservation.reservedAt)}
+          </p>
+        )}
+
+        {host.allowedTransitions(table).length > 0 && (
+          <div>
+            <p className="mb-2 text-xs tracking-wide text-smoke uppercase">{t.dashboard.detail.changeStatus}</p>
+            <div className="flex flex-wrap gap-2">
+              {host.allowedTransitions(table).map((status) => (
+                <Button
+                  key={status}
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => void actions.run(() => host.updateTableStatus(table.id, status), t.dashboard.success.updated)}
+                >
+                  → {t.statuses.table[status]}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="rounded-xl border border-torii/25 bg-torii/5 p-4">
+          <p className="mb-3 flex items-center gap-2 text-sm font-semibold">
+            <Bot className="size-4 text-torii" aria-hidden="true" />
+            {t.dashboard.detail.suggestTitle}
+          </p>
+          {activeSuggestion ? (
+            <div className="space-y-3 text-sm">
+              <p className="leading-relaxed text-ivory/90">{activeSuggestion.reasoning}</p>
+              {activeSuggestion.entry ? (
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge tone="gold">{activeSuggestion.entry.ticketCode}</Badge>
+                  <span className="text-xs text-mist">
+                    {activeSuggestion.entry.guestName} · {fill(t.common.guestsCount, { count: activeSuggestion.entry.partySize })} →{' '}
+                    {activeSuggestion.tables.map((candidate) => candidate.code).join(' + ')}
+                  </span>
+                  {isFree && (
+                    <Button
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() =>
+                        void actions
+                          .run(
+                            () => services().waitlist.seat(activeSuggestion.entry!.id, activeSuggestion.tables.map((candidate) => candidate.id)),
+                            t.dashboard.success.seated,
+                          )
+                          .then((ok) => ok && setSuggestion(null))
+                      }
+                    >
+                      {fill(t.dashboard.detail.suggestSeat, { ticket: activeSuggestion.entry.ticketCode })}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-mist">{t.dashboard.detail.suggestNone}</p>
+              )}
+              <p className="text-xs text-smoke">{activeSuggestion.isFallback ? t.ai.fallback : fill(t.ai.poweredBy, { model: activeSuggestion.model })}</p>
+            </div>
+          ) : (
+            <Button size="sm" variant="gold" onClick={askSuggestion} loading={suggesting} icon={<Bot className="size-3.5" />}>
+              {suggesting ? t.dashboard.detail.suggesting : t.dashboard.detail.suggestButton}
+            </Button>
+          )}
+        </div>
+
+        {isFree && (
+          <form onSubmit={seatWalkIn} className="space-y-3">
+            <p className="flex items-center gap-2 text-sm font-semibold">
+              <UserPlus className="size-4 text-matcha" aria-hidden="true" />
+              {t.dashboard.detail.walkInTitle}
+            </p>
+            <Field label={t.dashboard.detail.walkInName} htmlFor="walk-in-name">
+              <TextInput id="walk-in-name" value={walkInName} onChange={(event) => setWalkInName(event.target.value)} />
+            </Field>
+            <div className="flex items-center justify-between gap-3">
+              <Stepper value={walkInParty} min={1} max={table.capacity} onChange={setWalkInParty} label={t.dashboard.detail.walkInParty} />
+              <Button type="submit" size="sm" disabled={walkInName.trim().length < 2}>
+                {t.dashboard.detail.walkInSubmit}
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </Card>
+  );
+}
