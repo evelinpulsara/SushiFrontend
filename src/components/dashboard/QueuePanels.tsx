@@ -91,3 +91,96 @@ function WaitlistRow({ entry, freeTables, actions }: { entry: WaitlistEntry; fre
             size="sm"
             className="mt-3"
             disabled={chosen.length === 0 || chosenCapacity < entry.partySize}
+            onClick={() =>
+              void actions.run(() => waitlist.seat(entry.id, chosen), t.dashboard.success.seated).then((ok) => {
+                if (ok) {
+                  setChoosing(false);
+                  setChosen([]);
+                }
+              })
+            }
+          >
+            {t.dashboard.actions.confirmSeat}
+          </Button>
+        </div>
+      )}
+    </li>
+  );
+}
+
+export function WaitlistPanel({ entries, tables, actions }: { entries: WaitlistEntry[]; tables: DiningTable[]; actions: PanelActions }) {
+  const { t } = useI18n();
+  const freeTables = services().host.freeTables(tables);
+  return (
+    <Card className="overflow-hidden">
+      <PanelTitle title={t.dashboard.waitlistTitle} count={entries.length} />
+      {entries.length === 0 ? (
+        <p className="px-5 py-10 text-center text-sm text-mist">{t.dashboard.emptyQueue}</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {entries.map((entry) => (
+            <WaitlistRow key={entry.id} entry={entry} freeTables={freeTables} actions={actions} />
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+export function UpcomingPanel({ reservations, actions }: { reservations: Reservation[]; actions: PanelActions }) {
+  const { t, fill, format } = useI18n();
+  const manager = services().reservations;
+  return (
+    <Card className="overflow-hidden">
+      <PanelTitle title={t.dashboard.upcomingTitle} count={reservations.length} />
+      {reservations.length === 0 ? (
+        <p className="px-5 py-10 text-center text-sm text-mist">{t.dashboard.noUpcoming}</p>
+      ) : (
+        <ul className="divide-y divide-line">
+          {reservations.map((reservation) => (
+            <li key={reservation.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
+              <span className="w-16 font-display text-lg font-bold text-gold tabular-nums">{format.clock(reservation.reservedAt)}</span>
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">{reservation.guestName}</p>
+                <p className="text-xs text-mist">
+                  {reservation.reservationCode} · {fill(t.common.guestsCount, { count: reservation.partySize })} ·{' '}
+                  {reservation.tables.map((table) => table.code).join(' + ')}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => void actions.run(() => manager.seat(reservation.id), t.dashboard.success.seated)}>
+                  {t.dashboard.actions.seat}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => void actions.run(() => manager.updateStatus(reservation.id, 'no_show'), t.dashboard.success.updated)}>
+                  {t.dashboard.actions.noShow}
+                </Button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+export function AccuracyCard({ accuracy }: { accuracy: AIAccuracy | null }) {
+  const { t, fill } = useI18n();
+  const summary = accuracy?.last7Days;
+  return (
+    <Card className="p-5">
+      <h2 className="font-display text-lg font-semibold">{t.dashboard.accuracyTitle}</h2>
+      <p className="mt-1 text-xs text-smoke">{t.dashboard.accuracyText}</p>
+      {summary && summary.sampleSize > 0 ? (
+        <div className="mt-4 flex items-end gap-6">
+          <p className="font-display text-4xl font-bold text-gold">±{summary.meanAbsoluteErrorMinutes}</p>
+          <div className="space-y-1 text-xs text-mist">
+            {summary.withinFiveMinutesRate !== null && <p>{fill(t.dashboard.accuracyWithin, { value: summary.withinFiveMinutesRate })}</p>}
+            <p>{fill(t.dashboard.accuracySamples, { count: summary.sampleSize })}</p>
+          </div>
+        </div>
+      ) : (
+        <p className="mt-4 text-sm text-mist">{t.dashboard.kpis.aiAccuracyEmpty}</p>
+      )}
+    </Card>
+  );
+}
