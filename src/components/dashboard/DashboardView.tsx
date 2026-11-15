@@ -73,3 +73,78 @@ export function DashboardView() {
 
   const selectTable = (tableId: string) => {
     presence.focus(tableId);
+    startTransition(() => setSelectedId(tableId));
+  };
+
+  const data = overview.data;
+  const selected = data?.tables.find((table) => table.id === selectedId) ?? null;
+  const othersByTable = new Map(
+    presence.peers.filter((peer) => peer.tableId && peer.clientId !== presence.clientId).map((peer) => [peer.tableId!, peer.hostName]),
+  );
+
+  return (
+    <>
+      <PageHeader eyebrow={t.dashboard.eyebrow} title={t.dashboard.title} subtitle={t.dashboard.subtitle} kanji="采">
+        <div className="mt-5 flex flex-wrap items-center gap-4 text-xs">
+          <span className={`flex items-center gap-1.5 ${live.status === 'open' ? 'text-matcha' : 'text-gold'}`}>
+            <span className={`size-2 rounded-full ${live.status === 'open' ? 'animate-pulse-soft bg-matcha' : 'bg-gold'}`} />
+            {live.status === 'open' ? t.common.live : t.common.offline}
+          </span>
+          <span className="text-smoke">
+            {live.transport === 'shared-worker' && live.sharedTabs !== null
+              ? fill(t.live.sharedTabs, { count: live.sharedTabs })
+              : t.live.ownStream}
+          </span>
+          {data && <span className="text-smoke">{fill(t.common.updatedAt, { time: format.clock(data.generatedAt) })}</span>}
+          <Button variant="ghost" size="sm" icon={<RefreshCw className={`size-3.5 ${overview.loading ? 'animate-spin' : ''}`} />} onClick={reload}>
+            {t.common.retry}
+          </Button>
+        </div>
+      </PageHeader>
+
+      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+        {(actionError || success) && (
+          <div className="sticky top-20 z-40">
+            {actionError ? <Notice>{errorText(actionError)}</Notice> : <Notice tone="success">{success}</Notice>}
+          </div>
+        )}
+
+        <PresenceBar presence={presence} tableCodeOf={(tableId) => data?.tables.find((table) => table.id === tableId)?.code ?? null} />
+
+        {!data && overview.error && (
+          <Notice action={<Button size="sm" variant="secondary" onClick={reload}>{t.common.retry}</Button>}>{errorText(overview.error)}</Notice>
+        )}
+        {!data && !overview.error && <LoadingBlock label={t.common.loading} className="h-96" />}
+
+        {data && (
+          <>
+            <KpiGrid kpis={data.kpis} />
+
+            <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+              <section aria-label={t.dashboard.floorPlan}>
+                <h2 className="mb-3 font-display text-lg font-semibold">{t.dashboard.floorPlan}</h2>
+                <FloorPlan tables={data.tables} selectedId={selectedId} onSelect={(table) => selectTable(table.id)} handledBy={othersByTable} />
+              </section>
+              <div className="space-y-3 xl:pt-10">
+                {selected && othersByTable.has(selected.id) && (
+                  <Notice tone="info">{fill(t.presence.handling, { name: othersByTable.get(selected.id)! })}</Notice>
+                )}
+                <TableDetailPanel table={selected} actions={actions} />
+              </div>
+            </div>
+
+            <div className="grid gap-6 lg:grid-cols-2">
+              <WaitlistPanel entries={data.waitlist} tables={data.tables} actions={actions} />
+              <div className="space-y-6">
+                <UpcomingPanel reservations={data.upcomingReservations} actions={actions} />
+                <ForecastCard tables={data.tables} queue={data.waitlist} />
+                <AccuracyCard accuracy={accuracy.data} />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      <PerformanceHud />
+    </>
+  );
+}
