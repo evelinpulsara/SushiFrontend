@@ -41,15 +41,15 @@ function LiveFloorCard() {
       </div>
       {data ? (
         <dl className="grid grid-cols-2">
-          {stats.map((stat) => (
-            <div key={stat.label}>
+          {stats.map((stat, index) => (
+            <div key={stat.label} className={`px-5 py-4 ${index % 2 === 0 ? 'border-r border-line' : ''} ${index < 2 ? 'border-b border-line' : ''}`}>
               <dt className="text-xs text-smoke">{stat.label}</dt>
-              <dd className="font-display text-2xl font-bold text-ivory">{stat.value}</dd>
+              <dd className="mt-1 font-display text-2xl font-bold text-ivory sm:text-3xl">{stat.value}</dd>
             </div>
           ))}
         </dl>
       ) : (
-        <p className="py-6 text-center text-sm text-smoke">{kpis.error ? t.errors.network : t.common.loading}</p>
+        <p className="px-5 py-8 text-center text-sm text-smoke">{kpis.error ? t.errors.network : t.common.loading}</p>
       )}
     </Card>
   );
