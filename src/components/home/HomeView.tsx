@@ -31,16 +31,16 @@ function LiveFloorCard() {
     : [];
 
   return (
-    <Card className="w-full max-w-sm p-5 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)]">
-      <div className="mb-4 flex items-center justify-between">
-        <p className="text-xs tracking-[0.2em] text-mist uppercase">{t.home.liveTitle}</p>
-        <span className="flex items-center gap-1.5 text-xs text-matcha">
+    <Card className="w-full max-w-md border-line-strong/80 bg-surface/80 p-0 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-md">
+      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <p className="text-xs font-medium tracking-[0.18em] text-mist uppercase">{t.home.liveTitle}</p>
+        <span className="flex shrink-0 items-center gap-1.5 rounded-full border border-matcha/30 bg-matcha/10 px-2.5 py-0.5 text-xs text-matcha">
           <span className="animate-pulse-soft size-1.5 rounded-full bg-matcha" />
           {t.common.live}
         </span>
       </div>
       {data ? (
-        <dl className="grid grid-cols-2 gap-4">
+        <dl className="grid grid-cols-2">
           {stats.map((stat) => (
             <div key={stat.label}>
               <dt className="text-xs text-smoke">{stat.label}</dt>
