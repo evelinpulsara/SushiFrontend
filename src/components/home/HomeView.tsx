@@ -87,17 +87,17 @@ function Hero() {
           </div>
         </div>
 
-        <div className="relative mx-auto flex w-full max-w-md flex-col items-center lg:max-w-none">
-          <div className="relative aspect-square w-full max-w-[420px]">
+        <div className="relative mx-auto flex w-full max-w-md flex-col items-center gap-8 lg:max-w-none">
+          <div className="relative aspect-square w-full max-w-[340px] xl:max-w-[380px]">
             <Enso className="absolute inset-0 size-full text-torii/80" />
             <div className="animate-float absolute inset-0 grid place-items-center">
-              <span className="font-display text-[9rem] leading-none font-bold text-ivory drop-shadow-[0_10px_40px_rgba(230,57,70,0.35)] sm:text-[11rem]">
+              <span className="font-display text-[8rem] leading-none font-bold text-ivory drop-shadow-[0_10px_40px_rgba(230,57,70,0.35)] sm:text-[9.5rem]">
                 {t.brand.kanji}
               </span>
             </div>
             <VerticalKanji text="おまかせ" className="absolute top-6 -right-2 text-lg tracking-[0.4em] text-gold/70 sm:-right-6" />
           </div>
-          <div className="relative -mt-16 w-full sm:-mt-20 sm:ml-auto sm:w-auto lg:-ml-16 lg:self-start">
+          <div className="relative flex w-full justify-center">
             <LiveFloorCard />
           </div>
         </div>
