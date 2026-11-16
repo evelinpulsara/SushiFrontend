@@ -83,3 +83,32 @@ The Service Worker never caches requests that carry an `Authorization` header.
   is a compile error.
 - The server always renders Spanish; the stored choice (`localStorage`) is restored after
   hydration. `LanguageManager` is a tiny observable store consumed with `useSyncExternalStore`.
+- `ApiClient` sends the active language in `Accept-Language`, so backend errors and every
+  Gemini answer come back in the language the guest is using.
+
+### Rendering patterns
+
+SSG (`/`), ISR with `'use cache'` + `cacheLife('hours')` (`/menu`), streaming SSR inside `<Suspense>`
+(`/reservations/[code]`) and CSR (`/dashboard`). See `src/lib/server/ServerApi.ts`.
+
+### Workers
+
+- `src/workers/forecast.worker.ts`: Web Worker for the Monte Carlo forecast (SharedArrayBuffer +
+  Atomics when `crossOriginIsolated`; COOP/COEP headers are set in `next.config.ts`).
+- `src/workers/live-events.shared-worker.ts`: Shared Worker that keeps one SSE connection for all tabs.
+- `public/sw.js`: Service Worker (offline app shell and menu, stale-while-revalidate).
+
+### Performance
+
+`InteractionMonitor` measures INP with the Event Timing API (Input Delay + Processing + Presentation).
+
+### Real time
+
+`LiveEventStream` wraps `EventSource` on `GET /api/events` (Server-Sent Events). The dashboard,
+the landing snapshot and waitlist tickets refresh as soon as tables, the queue or bookings change.
+
+## Deployment (Vercel)
+
+1. Import the repository in Vercel (framework preset: Next.js).
+2. Add the environment variable `NEXT_PUBLIC_API_URL=https://<your-backend>/api`.
+3. Deploy, then add the Vercel URL to the backend's `FRONTEND_URL`.
