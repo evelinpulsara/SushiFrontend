@@ -318,7 +318,9 @@ export const es = {
     notFound: 'No encontramos ese ticket.',
     liveHint: 'Se actualiza automáticamente',
     lookupTitle: '¿Ya tienes ticket?',
-    lookupPlaceholder: 'WL-XXXX',
+    lookupPlaceholder: 'WL-XXXX o RT-XXXXXX',
+    lookupHint: 'Escribe tu ticket de lista de espera (WL-…) o tu código de reserva (RT-…) para ver tu turno o tu mesa.',
+    lookupInvalid: 'Código no válido. Usa el formato WL-XXXX o RT-XXXXXX.',
   },
   concierge: {
     eyebrow: '板前 · Itamae',

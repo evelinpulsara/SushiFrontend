@@ -15,9 +15,23 @@ import { useRestaurantInfo } from '@/hooks/useRestaurantInfo';
 import type { ApiError } from '@/lib/api/ApiClient';
 import { useI18n } from '@/lib/i18n/LanguageProvider';
 import { services } from '@/lib/services/ServiceRegistry';
+import { ReservationManager } from '@/lib/services/ReservationManager';
 import { WaitlistManager } from '@/lib/services/WaitlistManager';
 
 const PHONE_PATTERN = /^\+?[0-9 ()-]{7,20}$/;
+
+function normalizeCode(raw: string): string {
+  const compact = raw.trim().toUpperCase().replace(/\s+/g, '');
+  const match = /^(WL|RT)-?([A-Z0-9]+)$/.exec(compact);
+  return match ? `${match[1]}-${match[2]}` : compact;
+}
+
+function lookupPath(raw: string): string | null {
+  const code = normalizeCode(raw);
+  if (WaitlistManager.isValidTicket(code)) return `/waitlist/${code}`;
+  if (ReservationManager.isValidCode(code)) return `/reservations/${code}`;
+  return null;
+}
 
 export function WaitlistView() {
   const { t, pick } = useI18n();
@@ -36,6 +50,7 @@ export function WaitlistView() {
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [ticketQuery, setTicketQuery] = useState('');
+  const [lookupInvalid, setLookupInvalid] = useState(false);
 
   const maxParty = info.data?.settings.maxPartySize ?? 12;
   const canJoin = guestName.trim().length >= 2 && PHONE_PATTERN.test(guestPhone.trim());
@@ -148,28 +163,36 @@ export function WaitlistView() {
 
           <Card className="p-5">
             <h3 className="text-sm font-semibold">{t.waitlist.lookupTitle}</h3>
+            <p className="mt-1 text-xs text-smoke">{t.waitlist.lookupHint}</p>
             <form
               className="mt-3 flex gap-2"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (WaitlistManager.isValidTicket(ticketQuery)) router.push(`/waitlist/${ticketQuery.trim().toUpperCase()}`);
+                const path = lookupPath(ticketQuery);
+                if (path) router.push(path);
+                else setLookupInvalid(true);
               }}
             >
               <TextInput
                 value={ticketQuery}
-                onChange={(event) => setTicketQuery(event.target.value)}
+                onChange={(event) => {
+                  setTicketQuery(event.target.value);
+                  setLookupInvalid(false);
+                }}
                 placeholder={t.waitlist.lookupPlaceholder}
                 aria-label={t.waitlist.lookupTitle}
+                aria-invalid={lookupInvalid}
                 className="font-mono uppercase"
               />
               <Button
                 type="submit"
                 variant="secondary"
-                disabled={!WaitlistManager.isValidTicket(ticketQuery)}
+                disabled={ticketQuery.trim().length === 0}
                 icon={<Search className="size-4" />}
                 aria-label={t.reservation.lookupButton}
               />
             </form>
+            {lookupInvalid && <p className="mt-2 text-xs text-torii">{t.waitlist.lookupInvalid}</p>}
           </Card>
         </div>
       </div>

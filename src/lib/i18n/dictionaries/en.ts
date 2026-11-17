@@ -320,7 +320,9 @@ export const en: Dictionary = {
     notFound: 'We could not find that ticket.',
     liveHint: 'Updates automatically',
     lookupTitle: 'Already have a ticket?',
-    lookupPlaceholder: 'WL-XXXX',
+    lookupPlaceholder: 'WL-XXXX or RT-XXXXXX',
+    lookupHint: 'Enter your waitlist ticket (WL-…) or booking code (RT-…) to see your turn or your table.',
+    lookupInvalid: 'Invalid code. Use the format WL-XXXX or RT-XXXXXX.',
   },
   concierge: {
     eyebrow: '板前 · Itamae',
