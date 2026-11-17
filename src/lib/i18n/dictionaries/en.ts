@@ -371,7 +371,7 @@ export const en: Dictionary = {
     waitlistTitle: 'Waitlist',
     emptyQueue: 'Nobody is waiting.',
     upcomingTitle: 'Upcoming bookings',
-    noUpcoming: 'No bookings in the next 3 hours.',
+    noUpcoming: 'No pending or confirmed bookings.',
     accuracyTitle: 'Promises vs. reality',
     accuracyText: 'Mean error between estimated and real wait of seated parties.',
     accuracyWithin: '{value}% within ±5 min',
@@ -401,6 +401,8 @@ export const en: Dictionary = {
       suggestSeat: 'Seat {ticket}',
     },
     actions: {
+      confirm: 'Approve',
+      cancelReservation: 'Cancel this booking?',
       seat: 'Seat',
       notify: 'Call',
       cancel: 'Cancel',

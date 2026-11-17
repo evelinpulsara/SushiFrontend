@@ -369,7 +369,7 @@ export const es = {
     waitlistTitle: 'Lista de espera',
     emptyQueue: 'No hay grupos esperando.',
     upcomingTitle: 'Próximas reservas',
-    noUpcoming: 'No hay reservas en las próximas 3 horas.',
+    noUpcoming: 'No hay reservas pendientes ni confirmadas.',
     accuracyTitle: 'Promesas vs. realidad',
     accuracyText: 'Error medio entre la espera estimada y la real de los grupos sentados.',
     accuracyWithin: '{value}% dentro de ±5 min',
@@ -399,6 +399,8 @@ export const es = {
       suggestSeat: 'Sentar a {ticket}',
     },
     actions: {
+      confirm: 'Aprobar',
+      cancelReservation: '¿Cancelar esta reserva?',
       seat: 'Sentar',
       notify: 'Llamar',
       cancel: 'Cancelar',

@@ -127,6 +127,12 @@ export function WaitlistPanel({ entries, tables, actions }: { entries: WaitlistE
   );
 }
 
+function isToday(iso: string): boolean {
+  const zone = 'America/Bogota';
+  const day = (date: Date) => date.toLocaleDateString('en-CA', { timeZone: zone });
+  return day(new Date(iso)) === day(new Date());
+}
+
 export function UpcomingPanel({ reservations, actions }: { reservations: Reservation[]; actions: PanelActions }) {
   const { t, fill, format } = useI18n();
   const manager = services().reservations;
@@ -139,20 +145,43 @@ export function UpcomingPanel({ reservations, actions }: { reservations: Reserva
         <ul className="divide-y divide-line">
           {reservations.map((reservation) => (
             <li key={reservation.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-              <span className="w-16 font-display text-lg font-bold text-gold tabular-nums">{format.clock(reservation.reservedAt)}</span>
+              <div className="w-20 shrink-0">
+                <p className="font-display text-lg font-bold text-gold tabular-nums">{format.clock(reservation.reservedAt)}</p>
+                {!isToday(reservation.reservedAt) && <p className="text-[11px] text-smoke">{format.longDate(reservation.reservedAt)}</p>}
+              </div>
               <div className="min-w-0 flex-1">
-                <p className="font-medium">{reservation.guestName}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{reservation.guestName}</p>
+                  <Badge tone={reservation.status === 'pending' ? 'gold' : 'aiiro'}>{t.statuses.reservation[reservation.status]}</Badge>
+                </div>
                 <p className="text-xs text-mist">
-                  {reservation.reservationCode} · {fill(t.common.guestsCount, { count: reservation.partySize })} ·{' '}
-                  {reservation.tables.map((table) => table.code).join(' + ')}
+                  {reservation.reservationCode} · {fill(t.common.guestsCount, { count: reservation.partySize })}
+                  {reservation.tables.length > 0 && ` · ${reservation.tables.map((table) => table.code).join(' + ')}`}
+                  {reservation.guestPhone && ` · ${reservation.guestPhone}`}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                {reservation.status === 'pending' && (
+                  <Button size="sm" variant="secondary" onClick={() => void actions.run(() => manager.updateStatus(reservation.id, 'confirmed'), t.dashboard.success.updated)}>
+                    {t.dashboard.actions.confirm}
+                  </Button>
+                )}
                 <Button size="sm" onClick={() => void actions.run(() => manager.seat(reservation.id), t.dashboard.success.seated)}>
                   {t.dashboard.actions.seat}
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => void actions.run(() => manager.updateStatus(reservation.id, 'no_show'), t.dashboard.success.updated)}>
                   {t.dashboard.actions.noShow}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    if (window.confirm(t.dashboard.actions.cancelReservation)) {
+                      void actions.run(() => manager.updateStatus(reservation.id, 'cancelled'), t.dashboard.success.updated);
+                    }
+                  }}
+                >
+                  {t.dashboard.actions.cancel}
                 </Button>
               </div>
             </li>
